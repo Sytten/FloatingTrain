@@ -17,7 +17,6 @@ inertiePx = 1169.1/(1000^2); % Interie de la plaque en kg*m^2
 inertiePy = inertiePx;
 inertieS = (2*masseS*(rayon_sphere^2))/5; % Inertie de la sph�re en kg*m^2
 
-
 % Initialisation des variables
 delta_phi = 0.01;
 phi_min = -5.0;
