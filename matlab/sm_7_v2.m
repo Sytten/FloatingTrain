@@ -20,6 +20,9 @@ inertieS = (2*masseS*(rayon_sphere^2))/5; % Inertie de la sphere en kg*m^2
 acc = -(masseS*g)/(masseS+inertieS/(rayon_sphere^2));
 msg_ip = (masseS*g)/inertiePx;
 
+
+mU_ABC = [1 1 1];
+
 % Constante a défénir
 Ra = 1;
 Rb = 1;
@@ -66,13 +69,21 @@ m0_2x3 = [0 0 0;
      
 m0_3x2 = zeros(3,2);
 m0_2x2 = zeros(2,2);
+m0_3x4 = zeros(3,4);
+m0_4x3 = zeros(4,3);
      
+m1_4x4 = [1 0 0 0;
+         0 1 0 0;
+         0 0 1 0
+         0 0 0 1 ];
+
 m1_3x3 = [1 0 0;
          0 1 0;
          0 0 1];
           
 m1_2x2 = [1 0 ;
          0 1 ];
+     
      
 mSP_2x3 = [0 acc 0;
           acc 0 0];
@@ -112,22 +123,23 @@ mPP_3x3 = [(dFb_dPhi_e-dFc_dPhi_e)*((Tabc*sin60)/inertiePx) (dFb_dTheta_e-dFc_dT
            (dFa_dPhi_e + dFb_dPhi_e + dFc_dPhi_e )*(1/(masseP + masseS)) (dFa_dTheta_e + dFb_dTheta_e + dFc_dTheta_e )*(1/(masseP + masseS)) (dFa_dz_e + dFb_dz_e + dFc_dz_e )*(1/(masseP + masseS))
            ];            
      
-% A 
-A = [
-    m0_3x3 m1_3x3 m0_3x2 m0_3x2 m0_3x3;
-    mPP_3x3 m0_3x3 mPS_3x2 m0_3x2 mPG_3x2;
-    m0_2x3 m0_2x3 m0_2x2 m1_2x2 m0_2x3;
-    mSP_2x3 m0_2x3 m0_2x2 m0_2x2 m0_2x3;
-    m0_3x3 m0_3x3 m0_3x2 m0_3x2 mCC_3x3;
-];
+ line1 = [m0_3x3 m1_3x3 m0_3x2 m0_3x2 m0_3x3];
+ line2 = [mPP_3x3 m0_3x3 mPS_3x2 m0_3x2 mPC_3x3 ];
+ line3 = [m0_2x3 m0_2x3 m0_2x2 m1_2x2 m0_2x3];
+ line4 = [mSP_2x3 m0_2x3 m0_2x2 m0_2x2 m0_2x3];
+ line5 = [m0_3x3 m0_3x3 m0_3x2 m0_3x2 mCC_3x3];
 
+ A = [line1;line2;line3;line4;line5];
 
+ B = [m0_3x3; m0_3x3; m0_2x3; m0_2x3; mCV_3x3];
     
+ C = [mTTdef m0_3x3 m0_3x4 m0_3x3;
+      m0_4x3 m0_4x3 m1_4x4 m0_4x3];
 
+ D = zeros(7,3);
 
-
-
-
+ sim('SimulinkModelisation');
+ plot(simout);
 
 
 
