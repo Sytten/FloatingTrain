@@ -86,7 +86,7 @@ m1_2x2 = [1 0 ;
      
      
 mSP_2x3 = [0 acc 0;
-          acc 0 0];
+          -acc 0 0];
       
 mPS_3x2 = [0 msg_ip;
           -msg_ip 0;
