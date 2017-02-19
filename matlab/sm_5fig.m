@@ -60,8 +60,8 @@ function sm_5fig_OpeningFcn(hObject, eventdata, handles, varargin)
 syms  z(t)
 masseS = 8/1000; %masse sphere
 masseP = 425/1000;%masse plaque
-inertiePx = 1169.1;%inertie de plaque sur axe x
-inertiePy = 1169.1; %inertie de plaque sur axe y
+inertiePx = 1169.1 / (1000^2);%inertie de plaque sur axe x
+inertiePy = 1169.1 / (1000^2); %inertie de plaque sur axe y
 g = -9.8;
 rayonS = 3.9 / 1000;  
 R = 95.2/1000;
