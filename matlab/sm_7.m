@@ -16,6 +16,10 @@ rayon_sphere = 3.9/1000;    % Rayon de la sphere en m.
 inertiePx = 1169.1/(1000^2); % Inertie de la plaque en kg*m^2
 inertiePy = inertiePx;
 inertieS = (2*masseS*(rayon_sphere^2))/5; % Inertie de la sphere en kg*m^2
+z_range  = 22.2e-03;  
+rDEF = 80.00e-03;    % Distance 2D du centre des aimants effet Hall au centre de la plaque
+rABC = 95.20e-03;     % Distance 2D du centre des aimants de sustentation au centre de la plaque
+A_range = (z_range/rABC)/(2*sqrt(2));
 
 acc = -(masseS*g)/(masseS+inertieS/(rayon_sphere^2));
 msg_ip = (masseS*g)/inertiePx;
@@ -23,26 +27,30 @@ msg_ip = (masseS*g)/inertiePx;
 
 mU_ABC = [1 1 1];
 
-% Constante a definir
-Ra = 1;
-Rb = 1;
-Rc = 1;
-La = 1;
-Lb = 1;
-Lc = 1;
+% Param?tres electriques des actionneurs
+RR = 3.6;
+LL = .115;
 
-Yd = 1;
-Ye = 1;
-Yf = 1;
-Xd = 1;
-Xe = 1;
-Xf = 1;
+% Constante a definir
+Ra = RR;
+Rb = RR;
+Rc = RR;
+La = LL;
+Lb = LL;
+Lc = LL;
+
+Yd = +rDEF*cosd(30);
+Xd = +rDEF*sind(30);
+Ye = 0.0;
+Xe = -rDEF;;
+Yf = -rDEF*cosd(30);
+Xf = +rDEF*sind(30);
 
 dFa_dia_e = 1;
 dFb_dib_e = 1;
 dFc_dic_e = 1;
-dFa_dPhi_e = 1;
-dFa_dTheta_e = 1;
+dFa_dPhi_e = 0;
+dFa_dTheta_e = 0;
 dFa_dz_e = 1;
 dFb_dPhi_e = 1;
 dFb_dTheta_e = 1;
@@ -50,7 +58,6 @@ dFb_dz_e = 1;
 dFc_dPhi_e = 1;
 dFc_dTheta_e = 1;
 dFc_dz_e = 1;
-Tabc = 1;
 
 ra_la = Ra / La;
 rb_lb = Rb / Lb;
@@ -113,13 +120,13 @@ mTTdef = [Yd -Xd 1;
           Ye -Xe 1;
           Yf -Xf 1];
       
-mPC_3x3 = [0 dFa_dia_e*((Tabc*sin60)/inertiePx) -dFc_dic_e*((Tabc*sin60)/inertiePx);
-           -dFa_dia_e*(Tabc/inertiePx) dFb_dib_e*((Tabc*cos60)/inertiePx) dFc_dic_e*((Tabc*cos60)/inertiePx);
+mPC_3x3 = [0 dFa_dia_e*((rABC*sin60)/inertiePx) -dFc_dic_e*((rABC*sin60)/inertiePx);
+           -dFa_dia_e*(rABC/inertiePx) dFb_dib_e*((rABC*cos60)/inertiePx) dFc_dic_e*((rABC*cos60)/inertiePx);
            dFa_dia_e*(1/(masseP+masseS)) dFb_dib_e*(1/(masseP+masseS)) dFc_dic_e*(1/(masseS+masseP))];
        
        
-mPP_3x3 = [(dFb_dPhi_e-dFc_dPhi_e)*((Tabc*sin60)/inertiePx) (dFb_dTheta_e-dFc_dTheta_e)*((Tabc*sin60)/inertiePx) (dFb_dz_e-dFc_dz_e)*((Tabc*sin60)/inertiePx);
-           (-dFa_dPhi_e+dFb_dPhi_e*cos60+dFc_dPhi_e*cos60)*(Tabc/inertiePx) (-dFa_dTheta_e-dFb_dTheta_e*cos60+dFc_dTheta_e*cos60)*(Tabc/inertiePx) (-dFa_dz_e + dFb_dz_e*cos60 + dFc_dPhi_e*cos60)*(Tabc/inertiePx);
+mPP_3x3 = [(dFb_dPhi_e-dFc_dPhi_e)*((rABC*sin60)/inertiePx) (dFb_dTheta_e-dFc_dTheta_e)*((rABC*sin60)/inertiePx) (dFb_dz_e-dFc_dz_e)*((rABC*sin60)/inertiePx);
+           (-dFa_dPhi_e+dFb_dPhi_e*cos60+dFc_dPhi_e*cos60)*(rABC/inertiePx) (-dFa_dTheta_e-dFb_dTheta_e*cos60+dFc_dTheta_e*cos60)*(rABC/inertiePx) (-dFa_dz_e + dFb_dz_e*cos60 + dFc_dPhi_e*cos60)*(rABC/inertiePx);
            (dFa_dPhi_e + dFb_dPhi_e + dFc_dPhi_e )*(1/(masseP + masseS)) (dFa_dTheta_e + dFb_dTheta_e + dFc_dTheta_e )*(1/(masseP + masseS)) (dFa_dz_e + dFb_dz_e + dFc_dz_e )*(1/(masseP + masseS))
            ];            
      
@@ -138,5 +145,5 @@ mPP_3x3 = [(dFb_dPhi_e-dFc_dPhi_e)*((Tabc*sin60)/inertiePx) (dFb_dTheta_e-dFc_dT
 
  D = zeros(7,3);
 
- sim('SimulinkModelisation');
+ sim('SimulinkModelisation2016A');
  plot(simout);
