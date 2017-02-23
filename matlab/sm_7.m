@@ -42,7 +42,7 @@ Lc = LL;
 Yd = +rDEF*cosd(30);
 Xd = +rDEF*sind(30);
 Ye = 0.0;
-Xe = -rDEF;;
+Xe = -rDEF;
 Yf = -rDEF*cosd(30);
 Xf = +rDEF*sind(30);
 
