@@ -59,5 +59,6 @@ droite_inv = [droite_int(2,half_d:end);droite_int(1,half_d:end)];
 retour_int = [retour_int(:,1:end-1/dx) fliplr(droite_inv)];
 plot(retour_int(1,:),retour_int(2,:));
 
-csvwrite('retour.csv', retour_int)
-csvwrite('aller.csv', aller_int)
+csvwrite('retour.csv', fliplr(retour_int)')
+csvwrite('aller.csv', aller_int')
+
