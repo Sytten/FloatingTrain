@@ -2,10 +2,16 @@ clc
 clear all
 close all
     
-ImageTest = imcomplement(imread('C:\UdeS_S4\Projet\images\vitesse max version 2\bmp\image_752.bmp'));
+ImageTest = imcomplement(imread('image_552.bmp'));
+ImageBille = imcomplement(imread('Bille_zmin.bmp'));
+
+MeanBille = (ImageBille(:,:,1)./3 + ImageBille(:,:,2)./3 + ImageBille(:,:,3)./3); 
 MeanImage = (ImageTest(:,:,1)./3 + ImageTest(:,:,2)./3 + ImageTest(:,:,3)./3); 
-imshow(MeanImage)
-edge(MeanImage)
+
+imshow(MeanBille)
+%Corrélation entre Bille et Image Teste
+
+%edge(MeanImage)
 
 
 %%
