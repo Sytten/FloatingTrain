@@ -2,17 +2,32 @@ clc
 clear all
 close all
     
-ImageTest = imcomplement(imread('image_552.bmp'));
-ImageBille = imcomplement(imread('Bille_zmin.bmp'));
-
+ImageTest =(imread('image_552.bmp')); %%image_552 dans statique zmin version 2 /bmp
+ImageBille = (imread('Bille_zmin.bmp'));
 MeanBille = (ImageBille(:,:,1)./3 + ImageBille(:,:,2)./3 + ImageBille(:,:,3)./3); 
 MeanImage = (ImageTest(:,:,1)./3 + ImageTest(:,:,2)./3 + ImageTest(:,:,3)./3); 
-
-imshow(MeanBille)
-%Corrélation entre Bille et Image Teste
-
+%imshow(MeanBille)
 %edge(MeanImage)
 
+%Corrélation entre Bille et Image Teste
+L = length(MeanBille) + length(MeanImage)- 1;
+H = size(MeanBille,1) + size(MeanImage,1)-1;
+
+BB = padarray(MeanBille,[H-size(MeanBille,1) L-length(MeanBille)],0,'pre');
+II = padarray(MeanImage,[H-size(MeanImage,1) L-length(MeanImage)],0,'pre');
+Bfft = fft(BB,L);
+Ifft = fft(II,L);
+xcf = fftshift((ifft(Ifft .* conj(Bfft),L)));
+plot(xcf);
+[max idx] = max(xcf(:));
+[x y] = ind2sub(size(xcf),idx)
+
+%
+%cc = xcorr2(MeanImage,MeanBille);
+%figure(2)
+%plot(cc);
+%[max idx] = max(cc(:));
+%[x y] = ind2sub(size(cc),idx)
 
 %%
 % lags = [-4, -3 -2, -1, 0, 1, 2, 3, 4];
