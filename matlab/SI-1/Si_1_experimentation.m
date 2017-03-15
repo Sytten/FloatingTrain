@@ -21,13 +21,18 @@ xcf = fftshift((ifft(Ifft .* conj(Bfft),L)));
 plot(xcf);
 [max idx] = max(xcf(:));
 [x y] = ind2sub(size(xcf),idx)
+TestImage = imread('image_552.bmp');
+imshow(TestImage)
+hold on;
+plot(x,y,'r.','MarkerSize',20)
 
-%
-%cc = xcorr2(MeanImage,MeanBille);
-%figure(2)
-%plot(cc);
-%[max idx] = max(cc(:));
-%[x y] = ind2sub(size(cc),idx)
+% cc = xcorr2(MeanImage,MeanBille);
+% [max idx] = max(cc(:));
+% [x y] = ind2sub(size(cc),idx)
+% figure(2)
+% imshow(TestImage)
+% hold on;
+% plot(x,y,'r.','MarkerSize',20)
 
 %%
 % lags = [-4, -3 -2, -1, 0, 1, 2, 3, 4];
