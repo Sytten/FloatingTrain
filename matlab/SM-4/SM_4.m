@@ -68,14 +68,14 @@ masseP = 425/1000;      % Masse de la plaque
 Ip = 1169.1; % kg*mm^2
 
 A9_9 = [0,0,0,1,0,0,0,0,0;
-          0,0,0,0,1,0,0,0,0;
-          0,0,0,0,0,1,0,0,0;
-          (dFa_dPhi_e2*(YA^2+YB^2+YC^2))/Ip,0,0,0,0,0,dFa_dia_e/Ip,0,0;
-          0,(dFa_dPhi_e2*(XA^2+XB^2+XC^2))/Ip,0,0,0,0,0,dFa_dia_e/Ip,0;
-          0,0,(dFa_dPhi_e2*3)/(masseS+masseP),0,0,0,0,0,dFa_dia_e/(masseS+masseP);
-          0,0,0,0,0,0,-Ra/La,0,0;
-          0,0,0,0,0,0,0,-Rb/Lb,0;
-          0,0,0,0,0,0,0,0,-Rc/Lc;];
+        0,0,0,0,1,0,0,0,0;
+        0,0,0,0,0,1,0,0,0;
+        (dFa_dPhi_e2*(YA^2+YB^2+YC^2))/Ip,0,0,0,0,0,dFa_dia_e/Ip,0,0;
+        0,(dFa_dPhi_e2*(XA^2+XB^2+XC^2))/Ip,0,0,0,0,0,dFa_dia_e/Ip,0;
+        0,0,(dFa_dPhi_e2*3)/(masseS+masseP),0,0,0,0,0,dFa_dia_e/(masseS+masseP);
+        0,0,0,0,0,0,-Ra/La,0,0;
+        0,0,0,0,0,0,0,-Rb/Lb,0;
+        0,0,0,0,0,0,0,0,-Rc/Lc;];
     
 
 B3_9 = [0,0,0;
