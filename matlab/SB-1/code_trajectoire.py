@@ -4,28 +4,17 @@ import math
 import sys
 import csv
 
-base_path = "/Users/philippegirard/git/FloatingTrain/matlab/SB-1/"
+base_path = "G:\\Programming\\Repositories\\University\\FloatingTrain\\matlab\\SB-1\\"
 aller_path = base_path + "aller.csv"
 retour_path = base_path + "retour.csv"
 
-FPS = 24
-
-            
-def delete_mesh():
-    for item in bpy.data.objects:
-        if item.type == "MESH":
-            item.select = True
-            bpy.ops.object.delete() 
+initial_x = -23
+initial_y = -10
+initial_z = -1.0
              
 # get the train object 
-#if "train" in bpy.data.objects:
-#   train = bpy.data.objects["train"]
-#else:
-    # creation de la balle
-delete_mesh()
-bpy.ops.mesh.primitive_uv_sphere_add()
-train = bpy.data.objects["Sphere"]
-train.name = "train"
+train = bpy.data.objects["train"]
+
     
 def parse_data(path):
     data = []
@@ -35,18 +24,22 @@ def parse_data(path):
             data.append(row)
     return data
 
-def animate(obj, data, vitesse, f):
+def animate(obj, data, f, r_i):
     i = f
     for r in data:
-        obj.location.x = float(r[0]) 
-        obj.location.y = float(r[1])
+        obj.location.x = float(r[0])*2 + initial_x 
+        obj.location.y = float(r[1])*2 + initial_y
+        obj.location.z = float(initial_z)
+        obj.rotation_euler.z = r_i*-1
+        
         # print(r[0] + " " + r[1])
-        obj.keyframe_insert(data_path = 'location', frame = vitesse * i * FPS)
+        obj.keyframe_insert(data_path = 'location', frame = i)
+        obj.keyframe_insert(data_path = 'rotation_euler', frame = i) 
         i +=1
     return i
         
     
 aller_data = parse_data(aller_path)
 retour_data = parse_data(retour_path)
-f = animate(train, aller_data, 0.007, 0)
-animate(train, retour_data, 0.007, f)
+f = animate(train, aller_data, 0, 0)
+animate(train, retour_data, f, math.pi)

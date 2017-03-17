@@ -3,8 +3,8 @@ dx = 0.06;
 figure 
 hold on
 
-aller = [1, 2, 3, 4, 5, 6;4.5, 3, 5, 2.5, 3, 4.5]; % X, Y
-retour = [1, 2, 3, 4, 5, 6;8, 10.5, 12, 9.5, 10, 8]; % X, Y
+aller = [1, 2, 3, 4, 5, 6;4.5, 2.6, 4.5, 2.8, 3.2, 4.6]; % X, Y
+retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
 plot(aller(2,:), 'o')
 plot(retour(2,:), 'o')
 
@@ -59,6 +59,6 @@ droite_inv = [droite_int(2,half_d:end);droite_int(1,half_d:end)];
 retour_int = [retour_int(:,1:end-1/dx) fliplr(droite_inv)];
 plot(retour_int(1,:),retour_int(2,:));
 
-csvwrite('retour.csv', fliplr(retour_int)')
-csvwrite('aller.csv', aller_int')
+csvwrite('retour_2.csv', fliplr(retour_int)')
+csvwrite('aller_2.csv', aller_int')
 
