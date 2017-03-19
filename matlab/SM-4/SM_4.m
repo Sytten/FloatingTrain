@@ -1,4 +1,4 @@
-% Auteur : Julien Larochelle
+% Auteur : Julien Larochelle, Antoine Mailhot et Philippe Girard
 % Date de création : 2017-03-16
 % Date d'édition :
 % Description du programme : Programme pour la systeme des equations
@@ -128,6 +128,8 @@ Btheta = [B13_3([2 5 12],2)];
 Bz = [B13_3([3 6 13],3)];
 
 BxS = [B13_3([7 9],1)];
+
+ByS = [B13_13([]
 
 % to do :petites matrices c et d 
 % phi est l'entree de y_sphere
