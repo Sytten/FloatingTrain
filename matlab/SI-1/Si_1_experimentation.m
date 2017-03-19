@@ -32,11 +32,13 @@ H = size(MeanBille,1) + size(MeanImage,1)-1;
 
 BB = padarray(MeanBille,[H-size(MeanBille,1) L-length(MeanBille)],0,'post');
 II = padarray(MeanImage,[H-size(MeanImage,1) L-length(MeanImage)],0,'post');
-Bfft = fft(BB,L);
-Ifft = fft(II,L);
-xcf = fftshift((ifft(Ifft .* conj(Bfft),L)));
-figure(1)
-plot(xcf);
+Bfft = fft2(BB);
+Ifft = fft2(II);
+%xcf = fftshift((ifft2(Ifft .* conj(Bfft))));
+xcf = (ifft2(Ifft .* conj(Bfft)));
+figure, surf(xcf), shading flat %Afficher le resultat de la correlation
+%figure(1)
+%plot(xcf);
 % 
 % [max idx] = max(xcf(:));
 % [x y] = ind2sub(size(xcf),idx)
