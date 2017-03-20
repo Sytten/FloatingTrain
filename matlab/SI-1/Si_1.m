@@ -9,64 +9,74 @@
 clc
 clear all
 close all
-%Chargé les images
-Image = imread('image_552.bmp');
+% Charger les images
+Image(:,:,:,1) = imread('image_718.bmp');
+Image(:,:,:,2) = imread('image_751.bmp');
+Image(:,:,:,3) = imread('image_785.bmp');
+Image(:,:,:,4) = imread('image_818.bmp');
+Image(:,:,:,5) = imread('image_852.bmp');
+Image(:,:,:,6) = imread('image_884.bmp');
+Image(:,:,:,7) = imread('image_918.bmp');
+Image(:,:,:,8) = imread('image_951.bmp');
+Image(:,:,:,9) = imread('image_985.bmp');
+Image(:,:,:,10) = imread('image_1018.bmp');
+N = 10;
 Bille = imread('Bille_zmin.bmp');
-tic
-%Image = Grayscale(Image)
+
+
 posX = 138;
 posY = 142;
 
-Image = im2double(Image(:,:,1));%(Image(:,:,1)/3+Image(:,:,2)/3+Image(:,:,3)/3);
-%Image = Image(posX-100:posX+100,posY-100:posX+100,1);%(Image(:,:,1)/3+Image(:,:,2)/3+Image(:,:,3)/3);
+Image = im2double(Image(:,:,1,:));
+%Image = im2double(Image(posX-100:posX+100,posY-100:posX+100,1, :));
 Bille = im2double(Bille(:,:,1));%(Bille(:,:,1)/3+Bille(:,:,2)/3+Bille(:,:,3)/3);
-%Correlation 2D Normalise
-c = normxcorr2(Bille,Image);
-toc
-figure, surf(c), shading flat %Afficher le resultat de la correlation
-
-%Trouver la position de la bille
-[ypeak, xpeak] = find(c==max(c(:)));
-yoffSet = ypeak-size(Bille,1); 
-xoffSet = xpeak-size(Bille,2);
-
-% %Afficher resultat
-% hFig = figure;
-% hAx  = axes;
-% imshow(Image,'Parent', hAx);
-% imrect(hAx, [xoffSet+1, yoffSet+1, size(Bille,2), size(Bille,1)]);
 
 %% FFT correlation
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A ne recalculer que quand la taille de Image change
+
 % Matrix dimensions
-adim = size(Image);
+adim = size(Image(:,:,1,1));
 bdim = size(Bille);
+
 % Cross-correlation dimension
-
 cdim = adim+bdim-1;
-
 bpad = zeros(cdim);
 apad = zeros(cdim);
 
-Bille = Bille - mean2(Bille);
-apad(1:adim(1),1:adim(2)) = Image;
-bpad(1:bdim(1),1:bdim(2)) = Bille(end:-1:1,end:-1:1);
+% Calcul de la FFT de la bille
+BilleNorm = Bille - mean2(Bille);
+bpad(1:bdim(1),1:bdim(2)) = BilleNorm(end:-1:1,end:-1:1);
 fftb = fft2(bpad);
-tic
-ffta = fft2(apad);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+for n = 1:1:N
+    
+    % Calcul de la FFT de l'image
+    tic
+    apad(1:adim(1),1:adim(2)) = Image(:,:,1,n);
+    ffta = fft2(apad);
 
-c = real(ifft2(ffta.*fftb));
+    % Correlation
+    correlation = real(ifft2(ffta.*fftb));
+    toc
 
-toc
-figure, surf(c), shading flat %Afficher le resultat de la correlation
+    % Affichage du résultat de la corrélation
+    figure, surf(correlation), shading flat %Afficher le resultat de la correlation
 
-[ypeak, xpeak] = find(c==max(c(:)));
-yoffSet = ypeak-size(Bille,1); 
-xoffSet = xpeak-size(Bille,2);
-hFig = figure;
-hAx  = axes;
-imshow(Image,'Parent', hAx);
-imrect(hAx, [xoffSet+1, yoffSet+1, size(Bille,2), size(Bille,1)]);
+    % Localisation de la bille
+    [ypeak, xpeak] = find(correlation==max(correlation(:)));
+    yoffSet = ypeak-size(Bille,1); 
+    xoffSet = xpeak-size(Bille,2);
+
+    % Dessin d'un rectangle sur la bille
+    hFig = figure;
+    hAx  = axes;
+    imshow(Image(:,:,1,n),'Parent', hAx);
+    imrect(hAx, [xoffSet+1, yoffSet+1, size(Bille,2), size(Bille,1)]);
+
+end
 
 
 
