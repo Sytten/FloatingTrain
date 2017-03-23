@@ -1,4 +1,4 @@
-% Auteur : Jordan Careau-Beaulieu, Jean-Pascal McGee
+% Auteur : Jordan Careau-Beaulieu, Jean-Pascal McGee, Antoine Mailhot
 % Date de creation : 09 fevrier 2017
 % Date d'edition : 09 fevrier 2017
 % Description du programme : Calcul de l'acceleration de la bille en
