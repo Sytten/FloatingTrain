@@ -23,12 +23,11 @@ Image(:,:,:,10) = imread('image_1018.bmp');
 N = 10;
 Bille = imread('Bille_zmin.bmp');
 
-
-posX = 138;
-posY = 142;
+%posX = 138;
+%posY = 142;
+%Image = im2double(Image(posX-100:posX+100,posY-100:posX+100,1, :));
 
 Image = im2double(Image(:,:,1,:));
-%Image = im2double(Image(posX-100:posX+100,posY-100:posX+100,1, :));
 Bille = im2double(Bille(:,:,1));%(Bille(:,:,1)/3+Bille(:,:,2)/3+Bille(:,:,3)/3);
 
 %% FFT correlation
@@ -74,7 +73,9 @@ for n = 1:1:N
     hFig = figure;
     hAx  = axes;
     imshow(Image(:,:,1,n),'Parent', hAx);
-    imrect(hAx, [xoffSet+1, yoffSet+1, size(Bille,2), size(Bille,1)]);
+    hold on;
+    plot(xoffSet+size(Bille,2)/2,yoffSet+size(Bille,2)/2,'b.','MarkerSize',20)
+    %imrect(hAx, [xoffSet+1, yoffSet+1, size(Bille,2), size(Bille,1)]);
 
 end
 
