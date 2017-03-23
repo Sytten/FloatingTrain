@@ -36,7 +36,7 @@ A_range = (z_range/rABC)/(2*sqrt(2));
 
 acc = -(masseS*g)/(masseS+inertieS/(rayon_sphere^2));
 msg_ip = (masseS*g)/inertiePx;
-
+Ip = 1169.1; % kg*mm^2
 
 mU_ABC = [1 1 1];
 
@@ -101,7 +101,7 @@ dFc_dz_e = ((ic_e^2+be1*abs(ic_e))*sign(ic_e))/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e
 
 dFc_dz_e2=dFc_dz_e; %Pour le systeme decouple
 
-
+dFa_dPhi_e2 = 1; % Voir avec Antoine Mailhot
 
 
 %Trigo
