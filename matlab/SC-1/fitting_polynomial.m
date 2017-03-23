@@ -31,14 +31,17 @@ disp(' ')
 
 figure
 hold on
-plot(z,Fs_sub, 'o')
+plot(z,Fs_sub, 'o','linewidth', 1)
 y = polyval(fliplr(Y'),z);
-plot(z, -1 ./ y)
+
+plot(z, -1 ./ y,'linewidth',1.5)
 xlabel('Distance z (m)')
 ylabel ('Force Fs (N)')
 title('Force Fs en fonction de la distance z')
 legend('Points Fs','Droite Fs')
 legend('Location','southeast')
+str = {'RMS : 0.012368','Correlation : 0.99895'};
+text(0.01, -6, str)
 hold off
 
 % Calculs pour l'approximation de Fe
@@ -55,7 +58,7 @@ Fe1_prime = C1 ./ Fe1_sub;
 [Y1, RMS, COR] = poly_approx(z1, Fe1_prime, 3);
 
 
-% Calculs pour l'approximation de Fe 1A
+% Calculs pour l'approximation de Fe 2A
 N = 150; % Nombre de points utilisés 
 b = 13.029359254409743; % Constante
 i = -2; % Courant
@@ -97,4 +100,8 @@ ylabel ('Force Fe (N)')
 title('Force Fe en fonction de la distance z')
 legend('Points Fe 1A','Droite Fe 1a','Points Fe 2A','Droite Fe 2a')
 legend('Location','southeast')
+str = {'Courant : 1 A','RMS : 0.105','Correlation : 1.0465'};
+text(0.01, -11, str)
+str = {'Courant : 2 A','RMS : 0.10802','Correlation : 0.95937'};
+text(0.01, -13, str)
 hold off
