@@ -101,7 +101,7 @@ dFc_dz_e = ((ic_e^2+be1*abs(ic_e))*sign(ic_e))/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e
 
 dFc_dz_e2=dFc_dz_e; %Pour le systeme decouple
 
-dFa_dPhi_e2 = 1; % Voir avec Antoine Mailhot
+dFa_dPhi_e2 = dFa_dPhi_e; % Voir avec Antoine Mailhot
 
 
 %Trigo
