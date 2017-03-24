@@ -8,10 +8,34 @@ clear all
 clc
 close all
 
+%% À déterminé 
+ia = 1;
+ib = 1;
+ic = 1;
+
+Va = 1;
+Vb = 1;
+Vc = 1;
+
 %% Load constants
 
 run('../constants.m')
 
+%% Determination des entrées
+
+U = [0, rABC*sin60, -rABC*sin60;
+     -rABC, rABC*cos60, rABC*cos60;
+     1, 1, 1];
+
+ U_inv = 1/(YA*(-XB+XC)+YB*(XA-XC)+YC*(-XA+XB))*[-XB+XC, YC-YB, -YB*XC+YC*XB;
+                                             -XC+XA, YA-YC, -YC*XA+YA*XC;
+                                             -XA+XB, YB-YA, -YA*XB+YB*XA]
+
+ % On multiplie U_inv par [iphi; itheta; iz] pour obtenir [iA; iB; iC] 
+ 
+ 
+ 
+ 
 %% Systeme plaque
 
 A13_13 = [0,0,0,1,0,0,0,0,0,0,0,0,0;
@@ -70,11 +94,12 @@ Dtheta = [0;0;0];
 Dz = [0;0;0];
 
 %State-space pour la plaque
-tf_phi = ss(Aphi, Bphi, Cphi, Dphi);
+
+tf_phi = ss2tf(Aphi, Bphi, Cphi, Dphi);
 sys_tf_phi = tf(tf_phi);
 
 tf_theta = ss(Atheta, Btheta, Ctheta, Dtheta);
-sys_tf_theta = tf(tf_theta);
+sys_tf_theta = tf(tf_theta)
 
 tf_z = ss(Az, Bz, Cz, Dz);
 sys_tf_z = tf(tf_z);
@@ -97,5 +122,10 @@ DxS = [0,0;0,0];
 DyS = [0,0;0,0];
 
 % State-space pour la sphere
-[b_tf_xs, a_tf_xs] = ss2tf(AxS,BxS,CxS,DxS,2);
-[b_tf_ys,a_tf_ys] = ss2tf(AyS,ByS,CyS,DyS,2);
+tf_xs = ss(AxS,BxS,CxS,DxS,2);
+sys_tf_xs = tf(tf_xs);
+
+tf_ys = ss(AyS,ByS,CyS,DyS,2);
+sys_tf_ys = tf(tf_ys);
+
+
