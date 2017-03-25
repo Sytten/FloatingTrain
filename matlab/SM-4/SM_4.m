@@ -9,13 +9,13 @@ clc
 close all
 
 %% À déterminé 
-ia = 1;
-ib = 1;
-ic = 1;
-
-Va = 1;
-Vb = 1;
-Vc = 1;
+% ia = 1;
+% ib = 1;
+% ic = 1;
+% 
+% Va = 1;
+% Vb = 1;
+% Vc = 1;
 
 %% Load constants
 
@@ -29,7 +29,11 @@ U = [0, rABC*sin60, -rABC*sin60;
 
  U_inv = 1/(YA*(-XB+XC)+YB*(XA-XC)+YC*(-XA+XB))*[-XB+XC, YC-YB, -YB*XC+YC*XB;
                                              -XC+XA, YA-YC, -YC*XA+YA*XC;
-                                             -XA+XB, YB-YA, -YA*XB+YB*XA]
+                                             -XA+XB, YB-YA, -YA*XB+YB*XA];
+                                         
+                                         
+                                         
+                                      
 
  % On multiplie U_inv par [iphi; itheta; iz] pour obtenir [iA; iB; iC] 
  
@@ -52,6 +56,26 @@ A13_13 = [0,0,0,1,0,0,0,0,0,0,0,0,0;
         0,0,0,0,0,0,0,0,0,0,0,-Rb/Lb,0;
         0,0,0,0,0,0,0,0,0,0,0,0,-Rc/Lc;];
     
+A9_9 = [0,0,0,1,0,0,0,0,0;
+        0,0,0,0,1,0,0,0,0;
+        0,0,0,0,0,1,0,0,0;
+        (dFa_dPhi_e2*(YA^2+YB^2+YC^2))/Ip,0,0,0,0,0,dFa_dia_e/Ip,0,0;
+        0,(dFa_dPhi_e2*(XA^2+XB^2+XC^2))/Ip,0,0,0,0,0,dFa_dia_e/Ip,0;
+        0,0,(dFa_dPhi_e2*3)/(masseS+masseP),0,0,0,0,0,dFa_dia_e/(masseS+masseP);
+        0,0,0,0,0,0,0,0,0;
+        0,0,0,0,0,0,0,0,0;
+        0,-masseS*g/(masseS+inertieS/rayon_sphere^2),0,0,0,0,0,0,0;
+        masseS*g/(masseS+inertieS/rayon_sphere^2),0,0,0,0,0,0,0,0;
+        0,0,0,0,0,0,-Ra/La,0,0;
+        0,0,0,0,0,0,0,-Rb/Lb,0;
+        0,0,0,0,0,0,0,0,-Rc/Lc;];
+    
+Unitaire9_9  = eye(9);
+
+sA = A9_9 * Unitaire9_9 ;
+for i = 1:9
+    Variables_etats_Plaque(i) = sum(sA(i,:))';
+end
 
 B13_3 = [0,0,0;
         0,0,0;
@@ -66,16 +90,34 @@ B13_3 = [0,0,0;
         1/La,0,0;
         0,1/Lb,0;
         0,0,1/Lc];
+    
+B3_3 = [1/La,0,0;
+        0,1/Lb,0;
+        0,0,1/Lc];
+    
+Unitaire3_3 = eye(3);
+sB = B3_3 * Unitaire3_3 ;
+for i = 1:3
+    Entrees_Plaque(i) = sum(sB(i,:))';
+end
       
-C = [Yd,-Xd,1,0,0,0,0,0,0,0,0,0,0;
+C3_9 = [Yd,-Xd,1,0,0,0,0,0,0,0,0,0,0;
      Ye,-Xe,1,0,0,0,0,0,0,0,0,0,0;
-     Yf,-Xf,1,0,0,0,0,0,0,0,0,0,0;
-     0,0,0,0,0,0,1,0,0,0,0,0,0;
-     0,0,0,0,0,0,0,1,0,0,0,0,0;
-     0,0,0,0,0,0,0,0,1,0,0,0,0;
-     0,0,0,0,0,0,0,0,0,1,0,0,0;];    
+     Yf,-Xf,1,0,0,0,0,0,0,0,0,0,0];   
+ 
+ C3_3 = [Yd,-Xd,1;
+     Ye,-Xe,1;
+     Yf,-Xf,1];
+ 
+ sC = B3_3 * Unitaire3_3 ;
+for i = 1:3
+    Sorties_Plaque(i) = sum(sC(i,:))';
+end
+ 
 
 D = zeros(7,3);
+
+D_Plaque = [0, 0, 0];
 
 Aphi = [A13_13([1 4 11],1),A13_13([1 4 11],4),A13_13([1 4 11],11)];
 Atheta = [A13_13([2 5 12],2),A13_13([2 5 12],5),A13_13([2 5 12],12)];
@@ -99,7 +141,7 @@ tf_phi = ss2tf(Aphi, Bphi, Cphi, Dphi);
 sys_tf_phi = tf(tf_phi);
 
 tf_theta = ss(Atheta, Btheta, Ctheta, Dtheta);
-sys_tf_theta = tf(tf_theta)
+sys_tf_theta = tf(tf_theta);
 
 tf_z = ss(Az, Bz, Cz, Dz);
 sys_tf_z = tf(tf_z);
