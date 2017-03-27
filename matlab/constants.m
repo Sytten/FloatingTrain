@@ -66,16 +66,22 @@ Xf = XF;
 
 
 %Valeurs a l'equilibre
-ia_e=1;
-ib_e=1;
-ic_e=1;
-z_e=1;
-phi_e=1;
-theta_e=1;
+
+z_e = Pzeq;
+phi_e = Axeq;
+theta_e = Ayeq;
 za_e=z_e+phi_e*YA-theta_e*XA;
 zb_e=z_e+phi_e*YB-theta_e*XB;
 zc_e=z_e+phi_e*YC-theta_e*XC;
 
+% From SS-2
+addpath ../SS-2/
+
+ie = equilibrium(z_e,phi_e,theta_e);
+
+ia_e = ie(1);
+ib_e = ie(2);
+ic_e = ie(3);
 
 %Constantes de Forces
 dFa_dia_e = 1/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)*2*ia_e*sign(ia_e)+be1;
@@ -102,4 +108,6 @@ dFa_dPhi_e2 = dFa_dPhi_e; % Voir avec Antoine Mailhot
 %Trigo
 sin60 = sin(degtorad(60));
 cos60 = cos(degtorad(60));
+
+
 
