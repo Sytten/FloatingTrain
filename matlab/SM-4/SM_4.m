@@ -8,15 +8,6 @@ clear all
 clc
 close all
 
-%% À déterminé 
-% ia = 1;
-% ib = 1;
-% ic = 1;
-% 
-% Va = 1;
-% Vb = 1;
-% Vc = 1;
-
 %% Load constants
 
 run('../constants.m')
@@ -28,18 +19,9 @@ U = [0, rABC*sin60, -rABC*sin60;
      1, 1, 1];
 
  U_inv = 1/(YA*(-XB+XC)+YB*(XA-XC)+YC*(-XA+XB))*[-XB+XC, YC-YB, -YB*XC+YC*XB;
-                                             -XC+XA, YA-YC, -YC*XA+YA*XC;
-                                             -XA+XB, YB-YA, -YA*XB+YB*XA];
+                                                 -XC+XA, YA-YC, -YC*XA+YA*XC;
+                                                 -XA+XB, YB-YA, -YA*XB+YB*XA];
                                          
-                                         
-                                         
-                                      
-
- % On multiplie U_inv par [iphi; itheta; iz] pour obtenir [iA; iB; iC] 
- 
- 
- 
- 
 %% Systeme plaque
 
 A13_13 = [0,0,0,1,0,0,0,0,0,0,0,0,0;
@@ -72,9 +54,9 @@ A9_9 = [0,0,0,1,0,0,0,0,0;
     
 Unitaire9_9  = eye(9);
 
-sA = A9_9 * Unitaire9_9 ;
+pA = A9_9 * Unitaire9_9 ;
 for i = 1:9
-    Variables_etats_Plaque(i) = sum(sA(i,:))';
+    Variables_etats_Plaque(i) = sum(pA(i,:))';
 end
 
 B13_3 = [0,0,0;
@@ -96,9 +78,9 @@ B3_3 = [1/La,0,0;
         0,0,1/Lc];
     
 Unitaire3_3 = eye(3);
-sB = B3_3 * Unitaire3_3 ;
+pB = B3_3 * Unitaire3_3 ;
 for i = 1:3
-    Entrees_Plaque(i) = sum(sB(i,:))';
+    Entrees_Plaque(i) = sum(pB(i,:))';
 end
       
 C3_9 = [Yd,-Xd,1,0,0,0,0,0,0,0,0,0,0;
@@ -109,11 +91,10 @@ C3_9 = [Yd,-Xd,1,0,0,0,0,0,0,0,0,0,0;
      Ye,-Xe,1;
      Yf,-Xf,1];
  
- sC = B3_3 * Unitaire3_3 ;
+ pC = B3_3 * Unitaire3_3 ;
 for i = 1:3
-    Sorties_Plaque(i) = sum(sC(i,:))';
+    Sorties_Plaque(i) = sum(pC(i,:))';
 end
- 
 
 D = zeros(7,3);
 
@@ -137,37 +118,62 @@ Dz = [0;0;0];
 
 %State-space pour la plaque
 
-tf_phi = ss2tf(Aphi, Bphi, Cphi, Dphi);
-sys_tf_phi = tf(tf_phi);
+[b_phi, a_phi] = ss2tf(Aphi, Bphi, Cphi, Dphi);
 
-tf_theta = ss(Atheta, Btheta, Ctheta, Dtheta);
-sys_tf_theta = tf(tf_theta);
+[b_theta, a_theta] = ss2tf(Atheta, Btheta, Ctheta, Dtheta);
 
-tf_z = ss(Az, Bz, Cz, Dz);
-sys_tf_z = tf(tf_z);
-
+[b_z, a_z] = ss2tf(Az, Bz, Cz, Dz);
 
 %% Systeme sphere
+
+A4_4 = [0, 0, 1, 0;
+        0, 0, 0, 1;
+        0, 0, 0, 0;
+        0, 0, 0, 0];
+    
+Unitaire4_4 = eye(4);    
+sA = A4_4 * Unitaire4_4 ;
+for i = 1:4
+    Variables_etats_Sphere(i) = sum(sA(i,:))';
+end
 
 AxS = [A13_13([7 9],7),A13_13([7 9],9)];
 AyS = [A13_13([8 10],8),A13_13([8 10],10)];
 
+B2_2 = [0, 0;
+        -acc, acc];
+
 BxS = [0, 0; 0, acc];
 ByS = [0, 0; -acc, 0];
 
+Unitaire2_2 = eye(2);    
+sB = B2_2 * Unitaire2_2 ;
+for i = 1:2
+    Entrees_Sphere(i) = sum(sB(i,:))';
+end
+
 % phi est l'entree de y_sphere
 % theta est l'entree de x_sphere
-CxS = [1, 1; 1,1];
-CyS = [1, 1; 1, 1];
+
+C4_4 = [1,0,0,0;
+        0,1,0,0;
+        0,0,1,0;
+        0,0,0,1];    
+
+CxS = [1, 1; 1,1]; % PAS CERTAIN!!!
+CyS = [1, 1; 1, 1]; % PAS CERTAIN!!!
+
+sC = C4_4 * Unitaire4_4 ;
+for i = 1:4
+    Sortie_Sphere(i) = sum(sC(i,:))';
+end
 
 DxS = [0,0;0,0];
 DyS = [0,0;0,0];
 
+D_Sphere = [0,0];
+
 % State-space pour la sphere
-tf_xs = ss(AxS,BxS,CxS,DxS,2);
-sys_tf_xs = tf(tf_xs);
+[b_xs, a_xs] = ss2tf(AxS,BxS,CxS,DxS,2);
 
-tf_ys = ss(AyS,ByS,CyS,DyS,2);
-sys_tf_ys = tf(tf_ys);
-
-
+[b_ys, a_ys] = ss2tf(AyS,ByS,CyS,DyS,2);
