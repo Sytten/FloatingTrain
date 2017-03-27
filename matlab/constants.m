@@ -8,7 +8,11 @@ clear all
 clc
 close all
 
+%% Constant pour le banc d'essai
 
+run_bancessai
+
+%% Autres constantes
 %Declaration des constantes
 as0 = 0.0586667067;  %Les constantes ae et as sont obtenues a partir de SC1.
 as1 = 22.41055234;
@@ -23,51 +27,42 @@ be1 = 13.029359254409743; % Obtenu a partir du document specifications
 
 
 g = 9.81;               % Acceleration gravitationnelle.
-masseS = 8/1000;        % Masse de la sphere en kilogrammes.
-masseP = 425/1000;      % Masse de la plaque en kilogrammes.
-rayon_sphere = 3.9/1000;    % Rayon de la sphere en m.
-inertiePx = 1169.1/(1000^2); % Inertie de la plaque en kg*m^2
-inertiePy = inertiePx;
-inertieS = (2*masseS*(rayon_sphere^2))/5; % Inertie de la sphere en kg*m^2
-z_range  = 22.2e-03;  
-rDEF = 80.00e-03;    % Distance 2D du centre des aimants effet Hall au centre de la plaque
-rABC = 95.20e-03;     % Distance 2D du centre des aimants de sustentation au centre de la plaque
+masseS = mS;        % Masse de la sphere en kilogrammes.
+masseP = mP;      % Masse de la plaque en kilogrammes.
+rayon_sphere = rS;    % Rayon de la sphere en m.
+inertiePx = Jx; % Inertie de la plaque en kg*m^2
+inertiePy = Jy;
+inertieS = JS; % Inertie de la sphere en kg*m^2
+  
+% rDEF : Distance 2D du centre des aimants effet Hall au centre de la plaque
+% rABC : Distance 2D du centre des aimants de sustentation au centre de la plaque
 A_range = (z_range/rABC)/(2*sqrt(2));
 
 acc = -(masseS*g)/(masseS+inertieS/(rayon_sphere^2));
 msg_ip = (masseS*g)/inertiePx;
-
+Ip = Jx * 1000000; % kg*mm^2
 
 mU_ABC = [1 1 1];
 
-% Param?tres electriques des actionneurs
-RR = 3.6;
-LL = .115;
-
 % Resistances et bobines
-Ra = RR;
-Rb = RR;
-Rc = RR;
-La = LL;
-Lb = LL;
-Lc = LL;
+Ra = RA;
+Rb = RB;
+Rc = RC;
+La = LA;
+Lb = LB;
+Lc = LC;
 ra_la = Ra / La;
 rb_lb = Rb / Lb;
 rc_lc = Rc / Lc;
 
 %Positions actionneurs
-XA=rABC;
-XB=-rABC*sind(30);
-XC=-rABC*sind(30);
-YA=0;
-YB=rABC*cosd(30);
-YC=-rABC*cosd(30);
-Yd = +rDEF*cosd(30);
-Xd = +rDEF*sind(30);
-Ye = 0.0;
-Xe = -rDEF;
-Yf = -rDEF*cosd(30);
-Xf = +rDEF*sind(30);
+
+Yd = YD;
+Xd = XD;
+Ye = YE;
+Xe = XE;
+Yf = YF;
+Xf = XF;
 
 
 %Valeurs a l'equilibre
@@ -101,7 +96,7 @@ dFc_dz_e = ((ic_e^2+be1*abs(ic_e))*sign(ic_e))/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e
 
 dFc_dz_e2=dFc_dz_e; %Pour le systeme decouple
 
-
+dFa_dPhi_e2 = dFa_dPhi_e; % Voir avec Antoine Mailhot
 
 
 %Trigo
