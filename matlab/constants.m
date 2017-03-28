@@ -77,11 +77,8 @@ zb_e = z_plaque_e(2);
 zc_e = z_plaque_e(3);
 
 % From SS-2
-<<<<<<< HEAD
 addpath SS-2/
-=======
-addpath SS-2
->>>>>>> 93c4eaaa1118361121849952943f9a7835a0a75d
+
 
 [ie, fe] = equilibrium(z_e,phi_e,theta_e);
 
