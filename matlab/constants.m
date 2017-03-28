@@ -1,6 +1,6 @@
 % Auteur : Jordan Careau-Beaulieu, Jean-Pascal McGee, Antoine Mailhot
 % Date de creation : 09 fevrier 2017
-% Date d'edition : mars r 2017
+% Date d'edition : mars 2017
 % Description du programme : Calcul de l'acceleration de la bille en
 % fonction de l'angle de la plaque
 
@@ -48,6 +48,7 @@ mU_ABC = [1 1 1];
 Ra = RA;
 Rb = RB;
 Rc = RC;
+Rabc = [Ra; Rb; Rc];
 La = LA;
 Lb = LB;
 Lc = LC;
@@ -66,40 +67,47 @@ Xf = XF;
 
 
 %Valeurs a l'equilibre
-
 z_e = Pzeq;
 phi_e = Axeq;
 theta_e = Ayeq;
-za_e=z_e+phi_e*YA-theta_e*XA;
-zb_e=z_e+phi_e*YB-theta_e*XB;
-zc_e=z_e+phi_e*YC-theta_e*XC;
+angles_e = [phi_e;theta_e;z_e];
+z_plaque_e = TABC'*angles_e;
+za_e = z_plaque_e(1);
+zb_e = z_plaque_e(2);
+zc_e = z_plaque_e(3);
 
 % From SS-2
+<<<<<<< HEAD
 addpath SS-2/
+=======
+addpath SS-2
+>>>>>>> 93c4eaaa1118361121849952943f9a7835a0a75d
 
-ie = equilibrium(z_e,phi_e,theta_e);
+[ie, fe] = equilibrium(z_e,phi_e,theta_e);
 
 ia_e = ie(1);
 ib_e = ie(2);
 ic_e = ie(3);
 
-w_phi_e = 1;
-w_theta_e = 1;
-vz_e = 1;
+w_phi_e = 0;
+w_theta_e = 0;
+vz_e = 0;
 
-x_s_e = 1;
-y_s_e = 1;
-vx_s_e = 1;
-vy_s_e =1;
-zd_e = 1;
-ze_e = 1;
-fa_e = 1;
-fb_e = 1;
-fc_e = 1;
-
-va_e = 1;
-vb_e = 1;
-vc_e = 1;
+x_s_e = xSeq;
+y_s_e = ySeq;
+vx_s_e = 0;
+vy_s_e = 0;
+z_capteurs_e = TDEF'*angles_e;
+zd_e = z_capteurs_e(1);
+ze_e = z_capteurs_e(2);
+zf_e = z_capteurs_e(3);
+fa_e = fe(1);
+fb_e = fe(2);
+fc_e = fe(3);
+v_e = Rabc.*ie;
+va_e = v_e(1);
+vb_e = v_e(2);
+vc_e = v_e(3);
 
 
 %Constantes de Forces

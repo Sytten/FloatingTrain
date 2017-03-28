@@ -1,20 +1,19 @@
-% Auteur : Louis D'Amour
+% Auteurs : Louis D'Amour, Hugo Therrien
 % Date de création : 23 mars 2017
-% Date d'édition : 23 mars 2017
+% Date d'édition : 28 mars 2017
 % Description du programme : Fonction calculant les courants à l'équilibre
 
 
-function i_eq = equilibrium(z_eq, Ax, Ay, Px_eq, Py_eq, masseS)
-% EQUILIBRIUM Calcul les courants à l'équilibre des actionneurs.
-%   [i_eqA, i_eqB, i_eqC] = EQUILIBRIUM(Z) calcule les courants pour une
+function [i_eq, F_eq] = equilibrium(z_eq, Ax, Ay, Px_eq, Py_eq, masseS)
+% EQUILIBRIUM Calcule les courants et forces à l'équilibre des actionneurs.
+%   [i_eq, F_eq] = EQUILIBRIUM(Z) calcule les courants et forces pour une
 %   plaque horizontale et sans bille.
-%   [i_eqA, i_eqB, i_eqC] = EQUILIBRIUM(Z, PHI, THETA) calcule les courants pour une
-%   plaque avec un angle et sans bille.
-%   [i_eqA, i_eqB, i_eqC] = EQUILIBRIUM(Z, PHI, THETA, XS, YS, MS) calcule les courants pour une
-%   plaque avec un angle et avec une bille.
-%   [i_eqA, i_eqB, i_eqC] = EQUILIBRIUM(Z, 0, 0, XS, YS, MS) calcule les courants pour une
-%   plaque horizontale et avec une bille.
-%
+%   [i_eq, F_eq] = EQUILIBRIUM(Z, PHI, THETA) calcule les courants et
+%   forces pour une plaque avec un angle et sans bille.
+%   [i_eq, F_eq] = EQUILIBRIUM(Z, PHI, THETA, XS, YS, MS) calcule les
+%   courants et forces pour une plaque avec un angle et avec une bille.
+%   [i_eq, F_eq] = EQUILIBRIUM(Z, 0, 0, XS, YS, MS) calcule les courants et
+%   forces pour une plaque horizontale et avec une bille.
 % Fonction réalisée dans le but d'accomplir la tâche SS-2 du projet S4H17
 % pour l'équipe P01.
 
@@ -82,6 +81,4 @@ abs_i_eq = sign.*abs_i_eq;
 % Sorties
 
 i_eq = sum(abs_i_eq, 2);
-
-
 end
