@@ -24,8 +24,6 @@ ae2 = -30.42916186;
 ae3 = 787041.4323;
 be1 = 13.029359254409743; % Obtenu a partir du document specifications
 
-sign = -1; % le signe du courant est toujours négatif (sinon la plaque tombe).
-
 g = 9.81;               % Acceleration gravitationnelle.
 masseS = mS;        % Masse de la sphere en kilogrammes.
 masseP = mP;      % Masse de la plaque en kilogrammes.
@@ -77,7 +75,7 @@ zb_e = z_plaque_e(2);
 zc_e = z_plaque_e(3);
 
 % From SS-2
-addpath SS-2/
+addpath('matlab/SS-2')
 
 [ie, fe] = equilibrium(z_e,phi_e,theta_e);
 
