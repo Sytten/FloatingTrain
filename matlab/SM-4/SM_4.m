@@ -192,8 +192,8 @@ D_Sphere = zeros(4,3);
 
 
 %simulation
-% open_system('DYNctl_ver4_etud_obfusc')
-% set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
-% sim('DYNctl_ver4_etud_obfusc')
+open_system('DYNctl_ver4_etud_obfusc')
+set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
+sim('DYNctl_ver4_etud_obfusc')
 
 

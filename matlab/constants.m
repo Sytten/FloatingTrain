@@ -79,7 +79,6 @@ zc_e = z_plaque_e(3);
 % From SS-2
 addpath SS-2/
 
-
 [ie, fe] = equilibrium(z_e,phi_e,theta_e);
 
 ia_e = ie(1);
