@@ -24,7 +24,7 @@ ae2 = -30.42916186;
 ae3 = 787041.4323;
 be1 = 13.029359254409743; % Obtenu a partir du document specifications
 
-sign = -1; % le signe du courant est toujours négatif (sinon la plaque tombe).
+
 
 g = 9.81;               % Acceleration gravitationnelle.
 masseS = mS;        % Masse de la sphere en kilogrammes.
