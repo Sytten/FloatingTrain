@@ -83,6 +83,25 @@ ia_e = ie(1);
 ib_e = ie(2);
 ic_e = ie(3);
 
+w_phi_e = 1;
+w_theta_e = 1;
+vz_e = 1;
+
+x_s_e = 1;
+y_s_e = 1;
+vx_s_e = 1;
+vy_s_e =1;
+zd_e = 1;
+ze_e = 1;
+fa_e = 1;
+fb_e = 1;
+fc_e = 1;
+
+va_e = 1;
+vb_e = 1;
+vc_e = 1;
+
+
 %Constantes de Forces
 dFa_dia_e = 1/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)*2*ia_e*sign(ia_e)+be1;
 dFb_dib_e = 1/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3)*2*ib_e*sign(ib_e)+be1;
@@ -108,6 +127,7 @@ dFa_dPhi_e2 = dFa_dPhi_e; % Voir avec Antoine Mailhot
 %Trigo
 sin60 = sin(degtorad(60));
 cos60 = cos(degtorad(60));
+
 
 
 
