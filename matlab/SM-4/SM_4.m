@@ -101,6 +101,8 @@ C3_9 = [Yd,-Xd,1,  0,0,0,0,0,0,0,0,0,0;
     
 C_plaque = [TDEF',[0,0,0]',[0,0,0]',[0,0,0]',[0,0,0]',[0,0,0]',[0,0,0]'];
 
+C3_3_iden = eye(3);
+
 C_plaque_iden = eye(9);
  
  C3_3 = [Yd,-Xd,1;
@@ -189,6 +191,9 @@ D_Sphere = zeros(4,3);
 
 
 
-
+%simulation
+% open_system('DYNctl_ver4_etud_obfusc')
+% set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
+% sim('DYNctl_ver4_etud_obfusc')
 
 
