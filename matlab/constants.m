@@ -75,7 +75,7 @@ zb_e=z_e+phi_e*YB-theta_e*XB;
 zc_e=z_e+phi_e*YC-theta_e*XC;
 
 % From SS-2
-addpath ../SS-2/
+addpath SS-2/
 
 ie = equilibrium(z_e,phi_e,theta_e);
 
