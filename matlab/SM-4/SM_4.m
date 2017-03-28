@@ -156,19 +156,19 @@ A4_4 = [0, 0, 1, 0;
     
 A_sphere = A4_4;
 
-% AxS = [A13_13([7 9],7),A13_13([7 9],9)];
-% AyS = [A13_13([8 10],8),A13_13([8 10],10)];
+AxS = [A13_13([7 9],7),A13_13([7 9],9)];
+AyS = [A13_13([8 10],8),A13_13([8 10],10)];
 
 B4_3 = [0, 0, 0;
         0, 0, 0;
         
-        0, 0, acc;
-        0, -acc, 0];
+        0, acc,0;
+        -acc, 0,0];
     
 B_sphere = B4_3;
 
-% BxS = [0, 0; 0, acc];
-% ByS = [0, 0; -acc, 0];
+BxS = [0; acc];
+ByS = [-acc; 0];
 
 % phi est l'entree de y_sphere
 % theta est l'entree de x_sphere
@@ -176,11 +176,11 @@ B_sphere = B4_3;
 C4_4 = eye(4);
 C_sphere = C4_4;
 % 
-% CxS = [1, 1; 1,1]; % PAS CERTAIN!!!
-% CyS = [1, 1; 1, 1]; % PAS CERTAIN!!!
+CxS = eye(2);
+CyS = eye(2);
 % 
-% DxS = [0,0;0,0];
-% DyS = [0,0;0,0];
+DxS = [0;0];
+DyS = [0;0];
 
 D_Sphere = zeros(4,3);
 

@@ -133,6 +133,11 @@ dFa_dPhi_e2 = dFa_dPhi_e; % Voir avec Antoine Mailhot
 sin60 = sin(degtorad(60));
 cos60 = cos(degtorad(60));
 
+% Matrice tABC
+
+TABC_trans = TABC';
+
+TDEF_trans = TDEF'; 
 
 
 
