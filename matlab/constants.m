@@ -24,6 +24,7 @@ ae2 = -30.42916186;
 ae3 = 787041.4323;
 be1 = 13.029359254409743; % Obtenu a partir du document specifications
 
+
 g = 9.81;               % Acceleration gravitationnelle.
 masseS = mS;        % Masse de la sphere en kilogrammes.
 masseP = mP;      % Masse de la plaque en kilogrammes.
