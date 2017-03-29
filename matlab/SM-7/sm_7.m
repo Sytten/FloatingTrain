@@ -69,11 +69,15 @@ mTTdef = [Yd -Xd 1;
 mPC_3x3 = [0 dFa_dia_e*((rABC*sin60)/inertiePx) -dFc_dic_e*((rABC*sin60)/inertiePx);
            -dFa_dia_e*(rABC/inertiePx) dFb_dib_e*((rABC*cos60)/inertiePx) dFc_dic_e*((rABC*cos60)/inertiePx);
            dFa_dia_e*(1/(masseP+masseS)) dFb_dib_e*(1/(masseP+masseS)) dFc_dic_e*(1/(masseS+masseP))];
+
+       
+U = [YA, YB, YC; -XA, -XB, -XC; 1, 1, 1];
+mPP_test = [1/inertiePx, 0, 0; 0, 1/inertiePx, 0;  0, 0, 1/(masseP + masseS)]*U*[dFa_dPhi_e, dFa_dTheta_e, dFa_dz_e; dFb_dPhi_e, dFb_dTheta_e, dFb_dz_e; dFc_dPhi_e, dFc_dTheta_e, dFc_dz_e];
        
        
-mPP_3x3 = [(dFb_dPhi_e-dFc_dPhi_e)*((rABC*sin60)/inertiePx) (dFb_dTheta_e-dFc_dTheta_e)*((rABC*sin60)/inertiePx) (dFb_dz_e-dFc_dz_e)*((rABC*sin60)/inertiePx);
-           (-dFa_dPhi_e+dFb_dPhi_e*cos60+dFc_dPhi_e*cos60)*(rABC/inertiePx) (-dFa_dTheta_e-dFb_dTheta_e*cos60+dFc_dTheta_e*cos60)*(rABC/inertiePx) (-dFa_dz_e + dFb_dz_e*cos60 + dFc_dPhi_e*cos60)*(rABC/inertiePx);
-           (dFa_dPhi_e + dFb_dPhi_e + dFc_dPhi_e )*(1/(masseP + masseS)) (dFa_dTheta_e + dFb_dTheta_e + dFc_dTheta_e )*(1/(masseP + masseS)) (dFa_dz_e + dFb_dz_e + dFc_dz_e )*(1/(masseP + masseS))
+mPP_3x3 = [(dFb_dPhi_e-dFc_dPhi_e)*((rABC*sin60)/inertiePx), (dFb_dTheta_e-dFc_dTheta_e)*((rABC*sin60)/inertiePx), (dFb_dz_e-dFc_dz_e)*((rABC*sin60)/inertiePx);
+           (-dFa_dPhi_e+dFb_dPhi_e*cos60+dFc_dPhi_e*cos60)*(rABC/inertiePx), (-dFa_dTheta_e+dFb_dTheta_e*cos60+dFc_dTheta_e*cos60)*(rABC/inertiePx), (-dFa_dz_e + dFb_dz_e*cos60 + dFc_dPhi_e*cos60)*(rABC/inertiePx);
+           (dFa_dPhi_e + dFb_dPhi_e + dFc_dPhi_e )*(1/(masseP + masseS)), (dFa_dTheta_e + dFb_dTheta_e + dFc_dTheta_e )*(1/(masseP + masseS)), (dFa_dz_e + dFb_dz_e + dFc_dz_e )*(1/(masseP + masseS))
            ];            
      
  line1 = [m0_3x3 m1_3x3 m0_3x2 m0_3x2 m0_3x3];
