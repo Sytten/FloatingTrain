@@ -10,7 +10,7 @@ close all
 
 %% Load constants
 
-run('../constants.m')
+run('constants.m')
 
 %% Determination des entrées
 
@@ -51,12 +51,6 @@ A9_9 = [0,0,0,                                           1,0,0,  0,0,0;
         (dFa_dPhi_e2*(YA^2+YB^2+YC^2))/Ip,0,0,           0,0,0,  dFa_dia_e/Ip,0,0;
         0,(dFa_dPhi_e2*(XA^2+XB^2+XC^2))/Ip,0,           0,0,0,  0,dFa_dia_e/Ip,0;
         0,0,(dFa_dPhi_e2*3)/(masseS+masseP),             0,0,0,  0,0,dFa_dia_e/(masseS+masseP);
-        
-        0,0,0,                                           0,0,0,  0,0,0;
-        0,0,0,                                           0,0,0,  0,0,0;
-        
-        0,-masseS*g/(masseS+inertieS/rayon_sphere^2),0,  0,0,0,  0,0,0;
-        masseS*g/(masseS+inertieS/rayon_sphere^2),0,0,   0,0,0,  0,0,0;
         
         0,0,0,                                           0,0,0,  -Ra/La,0,0;
         0,0,0,                                           0,0,0,  0,-Rb/Lb,0;
@@ -114,26 +108,18 @@ D = zeros(7,3);
 
 D_plaque = zeros(3,3);
 
+A_phi = [A9_9([1 4 7],1),A9_9([1 4 7],4),A9_9([1 4 7],7)];
+A_theta = [A9_9([2 5 8],2),A9_9([2 5 8],5),A9_9([2 5 8],8)];
+A_z = [A9_9([3 6 9],3),A9_9([3 6 9],6),A9_9([3 6 9],9)];
 
-A_phi = [A13_13([1 4 11],1),A13_13([1 4 11],4),A13_13([1 4 11],11)];
-A_theta = [A13_13([2 5 12],2),A13_13([2 5 12],5),A13_13([2 5 12],12)];
-A_z = [A13_13([3 6 13],3),A13_13([3 6 13],6),A13_13([3 6 13],13)];
+B_phi = [B_plaque(7,:)]';
+B_theta = [B_plaque(8,:)]';
+B_z = [B_plaque(9,:)]';
 
-B_phi = [B13_3([1 4 11],1)];
-B_theta = [B13_3([2 5 12],2)];
-B_z = [B13_3([3 6 13],3)];
+C_phi = [C_plaque(1,[1 4 7]);C_plaque(2,[1,4,7]);C_plaque(3,[1,4,7])];
+C_theta = [C_plaque(1,[2 5 8]);C_plaque(2,[2,5,8]);C_plaque(3,[2,5,8])];
+C_z = [C_plaque(1,[3 6 9]);C_plaque(2,[3,6,9]);C_plaque(3,[3,6,9])];
 
-C_phi = [Yd, 0, 0; 
-         Ye, 0, 0; 
-         Yf, 0, 0];
-
-C_theta = [-Xd, 0,0;
-           -Xe,0,0; 
-           -Xf,0,0];
-     
-C_z = [1,0,0;
-       1,0,0;
-       1,0,0];
 
 D_phi = [0;0;0];
 D_theta = [0;0;0];
