@@ -1,6 +1,6 @@
 % Auteur : Jordan Careau-Beaulieu, Jean-Pascal McGee, Antoine Mailhot
 % Date de creation : 09 fevrier 2017
-% Date d'edition : mars r 2017
+% Date d'edition : mars 2017
 % Description du programme : Calcul de l'acceleration de la bille en
 % fonction de l'angle de la plaque
 
@@ -24,8 +24,6 @@ ae2 = -30.42916186;
 ae3 = 787041.4323;
 be1 = 13.029359254409743; % Obtenu a partir du document specifications
 
-
-
 g = 9.81;               % Acceleration gravitationnelle.
 masseS = mS;        % Masse de la sphere en kilogrammes.
 masseP = mP;      % Masse de la plaque en kilogrammes.
@@ -40,7 +38,7 @@ A_range = (z_range/rABC)/(2*sqrt(2));
 
 acc = -(masseS*g)/(masseS+inertieS/(rayon_sphere^2));
 msg_ip = (masseS*g)/inertiePx;
-Ip = Jx * 1000000; % kg*mm^2
+Ip = Jx; % kg*m^2
 
 mU_ABC = [1 1 1];
 
@@ -48,6 +46,7 @@ mU_ABC = [1 1 1];
 Ra = RA;
 Rb = RB;
 Rc = RC;
+Rabc = [Ra; Rb; Rc];
 La = LA;
 Lb = LB;
 Lc = LC;
@@ -66,40 +65,76 @@ Xf = XF;
 
 
 %Valeurs a l'equilibre
-ia_e=1;
-ib_e=1;
-ic_e=1;
-z_e=1;
-phi_e=1;
-theta_e=1;
-za_e=z_e+phi_e*YA-theta_e*XA;
-zb_e=z_e+phi_e*YB-theta_e*XB;
-zc_e=z_e+phi_e*YC-theta_e*XC;
+z_e = Pzeq;
+phi_e = Axeq;
+theta_e = Ayeq;
+angles_e = [phi_e;theta_e;z_e];
+z_plaque_e = TABC'*angles_e;
+za_e = z_plaque_e(1);
+zb_e = z_plaque_e(2);
+zc_e = z_plaque_e(3);
+
+% From SS-2
+addpath('matlab/SS-2')
+
+[ie, fe] = equilibrium(z_e,phi_e,theta_e);
+
+ia_e = ie(1);
+ib_e = ie(2);
+ic_e = ie(3);
+
+w_phi_e = 0;
+w_theta_e = 0;
+vz_e = 0;
+
+x_s_e = xSeq;
+y_s_e = ySeq;
+vx_s_e = 0;
+vy_s_e = 0;
+z_capteurs_e = TDEF'*angles_e;
+zd_e = z_capteurs_e(1);
+ze_e = z_capteurs_e(2);
+zf_e = z_capteurs_e(3);
+fa_e = fe(1);
+fb_e = fe(2);
+fc_e = fe(3);
+v_e = Rabc.*ie;
+va_e = v_e(1);
+vb_e = v_e(2);
+vc_e = v_e(3);
 
 
 %Constantes de Forces
-dFa_dia_e = 1/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)*2*ia_e*sign(ia_e)+be1;
-dFb_dib_e = 1/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3)*2*ib_e*sign(ib_e)+be1;
-dFc_dic_e = 1/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e^3)*2*ic_e*sign(ic_e)+be1;
+dFa_dia_e =     1/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3) *2*ia_e*sign(ia_e) +be1;
+dFb_dib_e =     1/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3) *2*ib_e*sign(ib_e) +be1;
+dFc_dic_e =     1/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e^3) *2*ic_e*sign(ic_e) +be1;
 
-dFa_dPhi_e = YA*((ia_e^2+be1*abs(ia_e))*sign(ia_e))/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)*(ae1+2*ae2*za_e+3*ae3*za_e^2)   +   YA/(as0+as1*za_e+as2*za_e^2+as3*za_e^3)*(as1+2*as2*za_e+3*as3*za_e^2);
-dFa_dTheta_e = -XA*((ia_e^2+be1*abs(ia_e))*sign(ia_e))/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)*(ae1+2*ae2*za_e+3*ae3*za_e^2)   +   -XA/(as0+as1*za_e+as2*za_e^2+as3*za_e^3)*(as1+2*as2*za_e+3*as3*za_e^2);
-dFa_dz_e = ((ia_e^2+be1*abs(ia_e))*sign(ia_e))/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)*(ae1+2*ae2*za_e+3*ae3*za_e^2)   +   1/(as0+as1*za_e+as2*za_e^2+as3*za_e^3)*(as1+2*as2*za_e+3*as3*za_e^2);
+dFa_dPhi_e =    YA * ( (ia_e^2+be1*abs(ia_e))*sign(ia_e) )/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)^2  *  (ae1+2*ae2*za_e+3*ae3*za_e^2)   +   YA / (as0+as1*za_e+as2*za_e^2+as3*za_e^3)^2  *  (as1+2*as2*za_e+3*as3*za_e^2);
+dFa_dTheta_e = -XA * ( (ia_e^2+be1*abs(ia_e))*sign(ia_e) )/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)^2  *  (ae1+2*ae2*za_e+3*ae3*za_e^2)   -   XA / (as0+as1*za_e+as2*za_e^2+as3*za_e^3)^2  *  (as1+2*as2*za_e+3*as3*za_e^2);
+dFa_dz_e =       1 * ( (ia_e^2+be1*abs(ia_e))*sign(ia_e) )/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)^2  *  (ae1+2*ae2*za_e+3*ae3*za_e^2)   +   1  / (as0+as1*za_e+as2*za_e^2+as3*za_e^3)^2  *  (as1+2*as2*za_e+3*as3*za_e^2);
 
-dFb_dPhi_e = YB*((ib_e^2+be1*abs(ib_e))*sign(ib_e))/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3)*(ae1+2*ae2*zb_e+3*ae3*zb_e^2)   +   YB/(as0+as1*zb_e+as2*zb_e^2+as3*zb_e^3)*(as1+2*as2*zb_e+3*as3*zb_e^2);
-dFb_dTheta_e =-XB*((ib_e^2+be1*abs(ib_e))*sign(ib_e))/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3)*(ae1+2*ae2*zb_e+3*ae3*zb_e^2)   +   -XB/(as0+as1*zb_e+as2*zb_e^2+as3*zb_e^3)*(as1+2*as2*zb_e+3*as3*zb_e^2);
-dFb_dz_e = ((ib_e^2+be1*abs(ib_e))*sign(ib_e))/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3)*(ae1+2*ae2*zb_e+3*ae3*zb_e^2)   +   1/(as0+as1*zb_e+as2*zb_e^2+as3*zb_e^3)*(as1+2*as2*zb_e+3*as3*zb_e^2);
+dFb_dPhi_e =    YB * ( (ib_e^2+be1*abs(ib_e))*sign(ib_e)  )/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3)^2 *  (ae1+2*ae2*zb_e+3*ae3*zb_e^2)   +   YB / (as0+as1*zb_e+as2*zb_e^2+as3*zb_e^3)^2  *  (as1+2*as2*zb_e+3*as3*zb_e^2);
+dFb_dTheta_e = -XB * ( (ib_e^2+be1*abs(ib_e))*sign(ib_e)  )/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3)^2 *  (ae1+2*ae2*zb_e+3*ae3*zb_e^2)   -   XB / (as0+as1*zb_e+as2*zb_e^2+as3*zb_e^3)^2  *  (as1+2*as2*zb_e+3*as3*zb_e^2);
+dFb_dz_e =       1 * ( (ib_e^2+be1*abs(ib_e))*sign(ib_e)  )/(ae0+ae1*zb_e+ae2*zb_e^2+ae3*zb_e^3)^2 *  (ae1+2*ae2*zb_e+3*ae3*zb_e^2)   +   1  / (as0+as1*zb_e+as2*zb_e^2+as3*zb_e^3)^2  *  (as1+2*as2*zb_e+3*as3*zb_e^2);
 
-dFc_dPhi_e = YC*((ic_e^2+be1*abs(ic_e))*sign(ic_e))/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e^3)*(ae1+2*ae2*zc_e+3*ae3*zc_e^2)   +   YC/(as0+as1*zc_e+as2*zc_e^2+as3*zc_e^3)*(as1+2*as2*zc_e+3*as3*zc_e^2);
-dFc_dTheta_e =-XC*((ic_e^2+be1*abs(ic_e))*sign(ic_e))/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e^3)*(ae1+2*ae2*zc_e+3*ae3*zc_e^2)   -  XC/(as0+as1*zc_e+as2*zc_e^2+as3*zc_e^3)*(as1+2*as2*zc_e+3*as3*zc_e^2);
-dFc_dz_e = ((ic_e^2+be1*abs(ic_e))*sign(ic_e))/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e^3)*(ae1+2*ae2*zc_e+3*ae3*zc_e^2)   +   1/(as0+as1*zc_e+as2*zc_e^2+as3*zc_e^3)*(as1+2*as2*zc_e+3*as3*zc_e^2);
+dFc_dPhi_e =    YC * ( (ic_e^2+be1*abs(ic_e))*sign(ic_e)  )/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e^3)^2 *  (ae1+2*ae2*zc_e+3*ae3*zc_e^2)   +   YC / (as0+as1*zc_e+as2*zc_e^2+as3*zc_e^3)^2  *  (as1+2*as2*zc_e+3*as3*zc_e^2);
+dFc_dTheta_e = -XC * ( (ic_e^2+be1*abs(ic_e))*sign(ic_e)  )/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e^3)^2 *  (ae1+2*ae2*zc_e+3*ae3*zc_e^2)   -   XC / (as0+as1*zc_e+as2*zc_e^2+as3*zc_e^3)^2  *  (as1+2*as2*zc_e+3*as3*zc_e^2);
+dFc_dz_e =       1 * ( (ic_e^2+be1*abs(ic_e))*sign(ic_e)  )/(ae0+ae1*zc_e+ae2*zc_e^2+ae3*zc_e^3)^2 *  (ae1+2*ae2*zc_e+3*ae3*zc_e^2)   +   1  / (as0+as1*zc_e+as2*zc_e^2+as3*zc_e^3)^2  *  (as1+2*as2*zc_e+3*as3*zc_e^2);
 
 dFc_dz_e2=dFc_dz_e; %Pour le systeme decouple
 
-dFa_dPhi_e2 = dFa_dPhi_e; % Voir avec Antoine Mailhot
+dFa_dPhi_e2 =  ( (ia_e^2+be1*abs(ia_e))*sign(ia_e) )/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)^2  *  (ae1+2*ae2*za_e+3*ae3*za_e^2)   +   1 / (as0+as1*za_e+as2*za_e^2+as3*za_e^3)^2  *  (as1+2*as2*za_e+3*as3*za_e^2);
 
 
 %Trigo
 sin60 = sin(degtorad(60));
 cos60 = cos(degtorad(60));
+
+% Matrice tABC
+
+TABC_trans = TABC';
+
+TDEF_trans = TDEF'; 
+
+
 
