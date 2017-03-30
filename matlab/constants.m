@@ -124,7 +124,7 @@ dFc_dz_e =       -1 * ( (ic_e^2+be1*abs(ic_e))*sign(ic_e)  )/(ae0+ae1*zc_e+ae2*z
 
 dFc_dz_e2=dFc_dz_e; %Pour le systeme decouple
 
-dFa_dPhi_e2 =  ( (ia_e^2+be1*abs(ia_e))*sign(ia_e) )/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)^2  *  (ae1+2*ae2*za_e+3*ae3*za_e^2)   +   1 / (as0+as1*za_e+as2*za_e^2+as3*za_e^3)^2  *  (as1+2*as2*za_e+3*as3*za_e^2);
+dFa_dPhi_e2 =  -1 * ( (ia_e^2+be1*abs(ia_e))*sign(ia_e) )/(ae0+ae1*za_e+ae2*za_e^2+ae3*za_e^3)^2  *  (ae1+2*ae2*za_e+3*ae3*za_e^2)   +   1 / (as0+as1*za_e+as2*za_e^2+as3*za_e^3)^2  *  (as1+2*as2*za_e+3*as3*za_e^2);
 
 
 %Trigo
