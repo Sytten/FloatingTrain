@@ -94,6 +94,6 @@ mPP_3x3 = [(dFb_dPhi_e-dFc_dPhi_e)*((rABC*sin60)/inertiePx), (dFb_dTheta_e-dFc_d
  D_prime = zeros(13,3);
 
 %% Simulation
-% open_system('DYNctl_ver4_etud_obfusc')
-% set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
-% sim('DYNctl_ver4_etud_obfusc')
+open_system('DYNctl_ver4_etud_obfusc')
+set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
+sim('DYNctl_ver4_etud_obfusc')
