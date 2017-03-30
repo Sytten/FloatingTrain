@@ -116,22 +116,27 @@ B_phi = [B_plaque(7,:)]';
 B_theta = [B_plaque(8,:)]';
 B_z = [B_plaque(9,:)]';
 
-C_phi = [C_plaque(1,[1 4 7]);C_plaque(2,[1,4,7]);C_plaque(3,[1,4,7])];
-C_theta = [C_plaque(1,[2 5 8]);C_plaque(2,[2,5,8]);C_plaque(3,[2,5,8])];
-C_z = [C_plaque(1,[3 6 9]);C_plaque(2,[3,6,9]);C_plaque(3,[3,6,9])];
+C_phi = [1, 0, 0];
+C_theta = [0,1,0];
+C_z = [0,0,1];
 
+D_phi_1sortie=0;
+D_theta_1sortie=0;
+D_z_1sortie=0;
 
 D_phi = [0;0;0];
 D_theta = [0;0;0];
 D_z = [0;0;0];
 
 % %State-space pour la plaque
-% 
-% [b_phi, a_phi] = ss2tf(Aphi, Bphi, Cphi, Dphi);
-% 
-% [b_theta, a_theta] = ss2tf(Atheta, Btheta, Ctheta, Dtheta);
-% 
-% [b_z, a_z] = ss2tf(Az, Bz, Cz, Dz);
+ 
+[b_phi, a_phi] = ss2tf(A_phi, B_phi, C_phi, D_phi_1sortie);
+
+[b_theta, a_theta] = ss2tf(A_theta, B_theta, C_theta, D_theta_1sortie);
+
+[b_z, a_z] = ss2tf(A_z, B_z, C_z, D_z_1sortie);
+
+
 
 %% Systeme sphere
 
@@ -154,7 +159,7 @@ B4_3 = [0, 0, 0;
 B_sphere = B4_3;
 
 BxS = [0; acc];
-ByS = [-acc; 0];
+ByS = [0; -acc];
 
 % phi est l'entree de y_sphere
 % theta est l'entree de x_sphere
@@ -176,8 +181,9 @@ D_Sphere = zeros(4,3);
 % [b_ys, a_ys] = ss2tf(AyS,ByS,CyS,DyS,2);
 
 %simulation
-open_system('DYNctl_ver4_etud_obfusc')
-set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
-sim('DYNctl_ver4_etud_obfusc')
+
+%open_system('DYNctl_ver4_etud_obfusc')
+%set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
+%sim('DYNctl_ver4_etud_obfusc')
 
 
