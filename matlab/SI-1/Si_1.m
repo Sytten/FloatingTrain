@@ -52,15 +52,15 @@ for n = 1:1:N
         if zoneGauche < 1
            zoneGauche = 1; 
         end
-        zoneDroite = xPosBille+100;
+        zoneDroite = xPosBille+demiTailleCarre;
         if zoneDroite > 480
             zoneDroite = 480;
         end
-        zoneHaute = yPosBille-100;
+        zoneHaute = yPosBille-demiTailleCarre;
         if zoneHaute < 1
             zoneHaute = 1;
         end
-        zoneBasse = yPosBille+100;
+        zoneBasse = yPosBille+demiTailleCarre;
         if zoneBasse > 480
             zoneBasse = 480;
         end
