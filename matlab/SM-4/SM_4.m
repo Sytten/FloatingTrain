@@ -44,7 +44,7 @@ A13_13 = [0,0,0,                                           1,0,0,  0,0,  0,0,  0
     
       
       
-A9_9 = [0,0,0,                                           1,0,0,  0,0,0;
+A_plaque = [0,0,0,                                           1,0,0,  0,0,0;
         0,0,0,                                           0,1,0,  0,0,0;
         0,0,0,                                           0,0,1,  0,0,0;
         
@@ -55,27 +55,6 @@ A9_9 = [0,0,0,                                           1,0,0,  0,0,0;
         0,0,0,                                           0,0,0,  -Ra/La,0,0;
         0,0,0,                                           0,0,0,  0,-Rb/Lb,0;
         0,0,0,                                           0,0,0,  0,0,-Rc/Lc;];
-    
-    A_plaque=A9_9;
-    
-
-B13_3 = [0,0,0;
-        0,0,0;
-        0,0,0;
-        
-        0,0,0;
-        0,0,0;
-        0,0,0;
-        
-        0,0,0;
-        0,0,0;
-        
-        0,0,0;
-        0,0,0;
-        
-        1/La,0,0;
-        0,1/Lb,0;
-        0,0,1/Lc];
     
 B_plaque = [0,0,0;
             0,0,0;
@@ -88,37 +67,28 @@ B_plaque = [0,0,0;
             1/La,0,0;
             0,1/Lb,0;
             0,0,1/Lc]; 
-      
-C3_9 = [Yd,-Xd,1,  0,0,0,0,0,0,0,0,0,0;
-        Ye,-Xe,1,  0,0,0,0,0,0,0,0,0,0;
-        Yf,-Xf,1,  0,0,0,0,0,0,0,0,0,0];
     
 C_plaque = [TDEF',[0,0,0]',[0,0,0]',[0,0,0]',[0,0,0]',[0,0,0]',[0,0,0]'];
 
 C3_3_iden = eye(3);
 
 C_plaque_iden = eye(9);
- 
- C3_3 = [Yd,-Xd,1;
-         Ye,-Xe,1;
-         Yf,-Xf,1];
- 
 
 D = zeros(7,3);
 
 D_plaque = zeros(3,3);
 
-A_phi = [A9_9([1 4 7],1),A9_9([1 4 7],4),A9_9([1 4 7],7)];
-A_theta = [A9_9([2 5 8],2),A9_9([2 5 8],5),A9_9([2 5 8],8)];
-A_z = [A9_9([3 6 9],3),A9_9([3 6 9],6),A9_9([3 6 9],9)];
+A_phi = [A_plaque([1 4 7],1),A_plaque([1 4 7],4),A_plaque([1 4 7],7)];
+A_theta = [A_plaque([2 5 8],2),A_plaque([2 5 8],5),A_plaque([2 5 8],8)];
+A_z = [A_plaque([3 6 9],3),A_plaque([3 6 9],6),A_plaque([3 6 9],9)];
 
 B_phi = [B_plaque(7,:)]';
 B_theta = [B_plaque(8,:)]';
 B_z = [B_plaque(9,:)]';
 
-C_phi = [1, 0, 0];
-C_theta = [0,1,0];
-C_z = [0,0,1];
+% C_phi = [1, 0, 0]; Permet de sortir seulement 1 variable
+% C_theta = [0,1,0];
+% C_z = [0,0,1];
 
 D_phi_1sortie=0;
 D_theta_1sortie=0;
@@ -127,15 +97,6 @@ D_z_1sortie=0;
 D_phi = [0;0;0];
 D_theta = [0;0;0];
 D_z = [0;0;0];
-
-% %State-space pour la plaque
- 
-[b_phi, a_phi] = ss2tf(A_phi, B_phi, C_phi, D_phi_1sortie);
-
-[b_theta, a_theta] = ss2tf(A_theta, B_theta, C_theta, D_theta_1sortie);
-
-[b_z, a_z] = ss2tf(A_z, B_z, C_z, D_z_1sortie);
-
 
 
 %% Systeme sphere
@@ -164,26 +125,15 @@ ByS = [0; -acc];
 % phi est l'entree de y_sphere
 % theta est l'entree de x_sphere
 
-C4_4 = eye(4);
-C_sphere = C4_4;
-
 CxS = eye(2);
 CyS = eye(2);
 
 DxS = [0;0];
 DyS = [0;0];
 
-D_Sphere = zeros(4,3);
-
-% State-space pour la sphere
-% [b_xs, a_xs] = ss2tf(AxS,BxS,CxS,DxS,2);
-% 
-% [b_ys, a_ys] = ss2tf(AyS,ByS,CyS,DyS,2);
-
 %simulation
-
-%open_system('DYNctl_ver4_etud_obfusc')
-%set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
-%sim('DYNctl_ver4_etud_obfusc')
+open_system('DYNctl_ver4_etud_obfusc')
+set_param('DYNctl_ver4_etud_obfusc','AlgebraicLoopSolver','LineSearch')
+sim('DYNctl_ver4_etud_obfusc')
 
 
