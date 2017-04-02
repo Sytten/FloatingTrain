@@ -15,9 +15,9 @@ run('constants.m')
 %% Determination des entrées
 
 U = [0,      rABC*sin60, -rABC*sin60;
-     -rABC,  rABC*cos60, rABC*cos60 ;
-     1,      1,          1,         ];
-
+    -rABC,  rABC*cos60, rABC*cos60 ;
+    1,      1,          1,         ];
+ 
  U_inv = 1/(YA*(-XB+XC)+YB*(XA-XC)+YC*(-XA+XB))*[-XB+XC, YC-YB, -YB*XC+YC*XB;
                                                  -XC+XA, YA-YC, -YC*XA+YA*XC;
                                                  -XA+XB, YB-YA, -YA*XB+YB*XA];
@@ -82,9 +82,9 @@ A_phi = [A_plaque([1 4 7],1),A_plaque([1 4 7],4),A_plaque([1 4 7],7)];
 A_theta = [A_plaque([2 5 8],2),A_plaque([2 5 8],5),A_plaque([2 5 8],8)];
 A_z = [A_plaque([3 6 9],3),A_plaque([3 6 9],6),A_plaque([3 6 9],9)];
 
-B_phi = [B_plaque(7,:)]';
-B_theta = [B_plaque(8,:)]';
-B_z = [B_plaque(9,:)]';
+B_phi = B_plaque([1,4,7],1);
+B_theta = B_plaque([2,5,8],2);
+B_z = B_plaque([3,6,9],3);
 
 % C_phi = [1, 0, 0]; Permet de sortir seulement 1 variable
 % C_theta = [0,1,0];
@@ -119,8 +119,8 @@ B4_3 = [0, 0, 0;
     
 B_sphere = B4_3;
 
-BxS = [0; acc];
-ByS = [0; -acc];
+BxS = B_sphere([1,3],2); 
+ByS = B_sphere([2,4],1);
 
 % phi est l'entree de y_sphere
 % theta est l'entree de x_sphere
