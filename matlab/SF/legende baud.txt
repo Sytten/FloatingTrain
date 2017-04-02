@@ -1,0 +1,11 @@
+Le nombre de colonnes correspond au nombre d'émetteurs.
+Chaque ligne donne pour chaque émetteur le symbole transmis.
+
+
+0 Rien de transmis
+1 FL1
+2 FH1
+3 FL2
+4 FH2
+5 FL3
+6 FH3
