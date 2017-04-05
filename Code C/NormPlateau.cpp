@@ -8,11 +8,11 @@ float* PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned i
 	float* plateauPad = new float[outWidth*outHeight];
 	
 	
-	for(int i = 0; i < inHeight; i++)
+	for(int height = 0; height < inHeight; height++)
 	{
-		for(int j = 0; j < inWidth*3; j += 3)
+		for(int width = 0; width < inWidth*3; width += 3)
 		{
-			plateauPad[j + outWidth*i] = (float)(in_ptrImage[j + inWidth*3*i]) / 255.0;
+			plateauPad[width + outWidth*height] = (float)(in_ptrImage[width + inWidth*3*height]) / 255.0;
 		}
 	}
 	
