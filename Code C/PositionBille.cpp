@@ -1,6 +1,6 @@
 
 // Retourne la position de la bille dans le tableau de la corrélation
-void PositionBille(float* correlation, unsigned int tailleX, unsigned int tailleY, float seuil, int* posX, int* posY)
+void PositionBille(float* correlation, unsigned int tailleX, unsigned int tailleY, float seuil, int* outPosX, int* outPosY)
 {
 	int posX_max = -1;
 	int posY_max = -1;
@@ -23,13 +23,13 @@ void PositionBille(float* correlation, unsigned int tailleX, unsigned int taille
 	// Si la valeur maximale est plus grande que le seuil, on retourne la position de la bille
 	if(val_max > seuil)
 	{
-		posX = posX_max;
-		posY = posY_max;
+		outPosX = posX_max;
+		outPosY = posY_max;
 	}
 	else
 	{
-		posX = -1;
-		posY = -1;
+		outPosX = -1;
+		outPosY = -1;
 	}
 }
 

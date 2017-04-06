@@ -5,7 +5,7 @@
 */
 float* PadBille(float* billeNorm, unsigned int outHeight, unsigned int outWidth)
 {
-	float* billeNormPad = new float[outHeight*outWidth];
+	float* billeNormPad = new float[outHeight*outWidth]();
 	
 	
 	for(int height = 0; height < SIZE_BILLE; height++)

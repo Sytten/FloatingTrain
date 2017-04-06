@@ -5,7 +5,7 @@
 */
 float* PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight)
 {
-	float* plateauPad = new float[outWidth*outHeight];
+	float* plateauPad = new float[outWidth*outHeight]();
 	
 	// Checks to make sure we don't try to crop out of bounds
 	if(cropX+cropWidth > inWidth)
