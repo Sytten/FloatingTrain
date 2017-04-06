@@ -153,7 +153,7 @@ for n = 1:1:N
     hold on;
     % Si la bille est présente,on sauvegarde jusqua 7 position et on affiche sa position
     if isBillePresente       
-        if(IndexBillesPosition < 7)
+        if(IndexBillesPosition <= 7)
             BillePositions(IndexBillesPosition,:) = [xPosBille yPosBille ];
             IndexBillesPosition = IndexBillesPosition +1;
         else
