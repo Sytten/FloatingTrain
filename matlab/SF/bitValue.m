@@ -1,6 +1,6 @@
-function [ b ] = bitValue(x, threshold )
-    m = sqrt(mean(x.^2));
-    if m >= threshold
+function [ b ] = bitValue(x, t1 )
+    m = sqrt(mean((x.*hamming(12)).^2));
+    if m >= t1
         b = 1;
     else
         b = 0;

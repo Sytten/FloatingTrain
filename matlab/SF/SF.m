@@ -1,93 +1,79 @@
+% Auteur : Julien Larochelle, Philippe Girard
+% Date de creation :  1 avril 2017
+% Date d'edition : avril 2017
+% Description du programme : RFID
+
 close all
 clear all
 clc
 
 load('signaux.mat')
 
+% initial signal
 Fs = 50.688 * 10^6;
 dx = Fs/length(signal_1a);
 x = 0:dx:Fs-dx;
-figure
-plot(x,abs(fft(signal_1a)))
+% figure
+% plot(x,abs(fft(signal_1a)))
 
-LO2 = 10.7 * 10^6 - Fs*pi/128/2;
+% oscillateur local
+LO2 = 10.7 * 10^6 - Fs/128/2;
 Osc = sin(2*pi*LO2*time);
 
-
+% déplacer le signal
 signal_1a_osc = signal_1a .* Osc;
-figure
-plot(x,abs(fft(signal_1a_osc)))
+% figure
+% plot(x,abs(fft(signal_1a_osc)))
 
-n = -1000:999;
-filt = sinc(1/32*n)/32;
-h = filt .* hamming(length(n))';
-figure
-plot(0:2*pi/length(n):2*pi-2*pi/length(n),abs(fft(h)))
+% coupe bande à pi/64
+n = -20:19;
+filt = sinc(1/64*n)/64;
+h1 = filt .* hamming(length(n))';
+% figure
+% l = 1;plot(0:l/length(n):l-l/length(n),abs(fft(h)));
 
-y = filter(h,1,signal_1a_osc);
-figure
-plot(x,abs(fft(y)))
-%% 
-close all
-clc
-
+% filtrer avec le coupe bande
+y = filtfilt(h1,1,signal_1a_osc);
 figure
 plot(x,abs(fft(y)))
 
-y2 = y(1:64:length(y));
-figure
+%% Sous-échantillonnage (64)
+y64 = downsample(y,64);
+figure 
 x64 = x(1:64:end);
-x64 = x64 ./ 64;
-plot(x64,abs(fft(y2)))
+plot(x64,abs(fft(y64)))
 
 %% filter with cheby
-Fs2 = 791920/2;
-[b,a] = cheby2(10,60,[230000/Fs2, 312000/Fs2], 'Bandpass');
-fz = freqz(b,a);
+[b1,a1] = filtreCheby(-82500,Fs,4000000);
+[b2,a2] = filtreCheby(82500,Fs,4000000);
+h1 = freqz(b1,a1,length(x64)/2);
+h2 = freqz(b2,a2,length(x64)/2);
 
-dxz = (length(x64)/2)/length(fz);
-xz = x64(1:dxz:end/2);
 figure 
 hold on
-plot(x64,abs(fft(y2)))
-plot(xz,abs(fz).*max(abs(fft(y2))))
+plot(x64,abs(fft(y64)))
+plot(x64(1:end/2),abs(h1).*max(abs(fft(y64))))
+plot(x64(1:end/2),abs(h2).*max(abs(fft(y64))))
 
 %% filter
-close all
-clc
-
-yz = filter(b,a,y2);
-yz = filtfilt(b,a,yz);
-figure
-plot(x64,abs(fft(yz)))
+yz1 = filtfilt(b1,a1,y64);
+yz2 = filtfilt(b2,a2,y64);
+figure 
+hold on
+plot(x64,abs(fft(yz1)))
+plot(x64,abs(fft(yz2)))
 
 %% redressage 
-
-n = 12
-pts = []
-for i = 1:n:length(yz)-n
-   m = sqrt(mean(yz(i:i+n).^2));
-   pts = [pts, m];
-end
-
-figure 
-plot(pts,'o')
-hold on
-plot([0,length(pts)],[0.12,0.12])
-
-
-threshold = [0.08];
+threshold = 0.0125;
+displaySeuil(yz1,threshold);
+displaySeuil(yz2,threshold);
 
 %% reconstruct bits 
-step = 12;
-result = [];
-for i = 1:step:length(yz)
-    bit = [0];
-    bit(1) = bitValue(yz(i:i+step-1),threshold(1));
-    result = [result; bit];
-end
+[ result1 ] = demodAM1(yz1,1, threshold);
+[ result2 ] = demodAM1(yz2,2, threshold);
 
-result = [result, baud_1a];
+result = [result1+result2, baud_1a];
+delete('res.csv')
 csvwrite('res.csv', result);
 
     
