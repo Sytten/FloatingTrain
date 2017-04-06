@@ -15,4 +15,6 @@ float* PadBille(float* billeNorm, unsigned int outHeight, unsigned int outWidth)
 			billeNormPad[width + outWidth*height] = billeNorm[width + SIZE_BILLE*height];
 		}
 	}
+	
+	return billeNormPad;
 }
