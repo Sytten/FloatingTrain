@@ -1,10 +1,16 @@
+close all
+clear all
+clc
+
+load('signaux.mat')
+
 Fs = 50.688 * 10^6;
 dx = Fs/length(signal_1a);
 x = 0:dx:Fs-dx;
 figure
 plot(x,abs(fft(signal_1a)))
 
-LO2 = 10.7/2 * 10^6;
+LO2 = 10.7 * 10^6 - Fs*pi/128/2;
 Osc = sin(2*pi*LO2*time);
 
 
@@ -12,12 +18,15 @@ signal_1a_osc = signal_1a .* Osc;
 figure
 plot(x,abs(fft(signal_1a_osc)))
 
-n = -100:100;
-filt = sinc(1/2*n)/2; % yolo pi/2
+n = -1000:999;
+filt = sinc(1/32*n)/32;
 h = filt .* hamming(length(n))';
+figure
+plot(0:2*pi/length(n):2*pi-2*pi/length(n),abs(fft(h)))
 
 y = filter(h,1,signal_1a_osc);
-
+figure
+plot(x,abs(fft(y)))
 %% 
 close all
 clc
