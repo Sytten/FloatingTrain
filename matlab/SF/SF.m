@@ -64,13 +64,14 @@ plot(x64,abs(fft(yz1)))
 plot(x64,abs(fft(yz2)))
 
 %% redressage 
-threshold = 0.0125;
-displaySeuil(yz1,threshold);
-displaySeuil(yz2,threshold);
+close all
+clc
+
+threshold = [displaySeuil(yz1) displaySeuil(yz2)];
 
 %% reconstruct bits 
-[ result1 ] = demodAM1(yz1,1, threshold);
-[ result2 ] = demodAM1(yz2,2, threshold);
+[ result1 ] = demodAM1(yz1,1, threshold(1));
+[ result2 ] = demodAM1(yz2,2, threshold(2));
 
 result = [result1+result2, baud_1a];
 delete('res.csv')
