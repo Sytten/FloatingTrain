@@ -44,7 +44,6 @@ print('rlocus_phi_non_compense','-dpng','-r300')
 %% Conception de l'asservissement
 phi_des = atand(-pi/(log(Mp/100)));
 zeta_des = cosd(phi_des);
-
 % A partir de respectivement ts, tp et tr
 wn_1 = 4/(ts*zeta_des);
 wn_2 = pi/(tp*sqrt(1-zeta_des^2));
@@ -60,10 +59,11 @@ print('rlocus_phi_non_compense_poles_des','-dpng','-r300')
 
 
 %% RePh avec zéro sur le pole à droite et
+distance_pole_pdes = 2;
 
 poles_ftbo_phi = roots(den_phi);
 z = poles_ftbo_phi(1);
-p = real(pdes)*2;
+p = real(pdes)*distance_pole_pdes;
 num_RePh = [1 -z];
 den_RePh = [1 -p];
 ft_RePh = tf(num_RePh,den_RePh);
@@ -72,7 +72,7 @@ ft_phi = ft_phi*ft_RePh;
 
 %% AvPh
 nb_AvPh = 2;
-phase_extra = 5;
+phase_extra = 22;
 
 angle_a_des = angle(polyval(num_phi,pdes)/polyval(den_phi,pdes))*180/pi-360;
 delta_phi = (- 180 - angle_a_des + phase_extra)/nb_AvPh;
@@ -97,8 +97,10 @@ rlocus(ft_phi*ft_AvPh);
 axis([-1000 150 -250 250])
 
 %% PI
+distance_zero_pdes = 7;
+
 p = 0;
-z = real(pdes)/10;
+z = real(pdes)/distance_zero_pdes;
 ft_PI = tf([1 -z],[1 -p]);
 
 %% affichage final
@@ -121,17 +123,15 @@ mp_ech = (max(y_ech)-1)/1*100;
 tp_ech = t_ech(y_ech==max(y_ech));
 fprintf('Temps de stabilisation echelon: %0.4f sec\n',ts_ech)
 fprintf('Depassement max: %0.2f%%\n',mp_ech)
+fprintf('Temps premier pic: %0.4f\n',t_ech(y_ech == max(y_ech)))
+
 t_10 = t_ech(y_ech >= 0.1);
 t_10 = t_10(1);
 
 t_90 = t_ech(y_ech >= 0.9);
 t_90 = t_90(1);
 
-t_100 = t_ech(y_ech >= 1);
-t_100 = t_100(1);
-
 fprintf('Temps de montee (10%% - 90%%): %0.4f sec\n',t_90-t_10)
-fprintf('Temps de montee (0%% - 100%%): %0.4f sec\n',t_100)
 
 figure
 plot(t_ech,y_ech)
