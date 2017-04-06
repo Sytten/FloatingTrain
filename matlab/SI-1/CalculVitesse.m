@@ -1,21 +1,25 @@
 function [ Vx,Vy ] = CalculVitesse( BillePositions,ordreMax ) 
-%Calcul Vitesse effectue une dérivation numérique pour obtenir la vitesse
-%de l'objet détecter. L'ordre de la dérivation numérique est sélectionnable
-%entre 1 et 6. H est fixe à 1/30 de sec car la fréquence déchantillonage
-%est 30Hz
+% Calcul Vitesse effectue une dérivation numérique pour obtenir la vitesse
+% de l'objet détecter. L'ordre de la dérivation numérique est sélectionnable
+% entre 1 et 6. H est fixe à 1/30 de sec car la fréquence déchantillonage
+% est 30Hz
 
-%Équation voir : https://en.wikipedia.org/wiki/Backward_differentiation_formula
+% Équation voir : https://en.wikipedia.org/wiki/Backward_differentiation_formula
 
-    %If ordreMax is impossible return 0 0
-    if ordreMax < 1 || ordreMax > 6
-        return  
+    % Clamp ordre max
+    if ordreMax < 1
+        ordreMax = 1;
+        disp(['L''ordre demandé n''est pas valide, ordre 1 utilisé.']);
+    elseif ordreMax > 6
+        ordreMax = 6;
+        disp(['L''ordre demandé n''est pas valide, ordre 6 utilisé.']);
     end
     
-    %Numerical Derivation
+    % Numerical Derivation
     LastIdx = size(BillePositions);
     LastIdx = LastIdx(1);
     
-    %Decide Best possible order to execute
+    % Decide Best possible order to execute
     if LastIdx > ordreMax 
         ordre = ordreMax;
     else 
@@ -44,8 +48,9 @@ function [ Vx,Vy ] = CalculVitesse( BillePositions,ordreMax )
         otherwise
             vitesseX = 0;
             vitesseY = 0;
+            disp(['L''ordre n''est pas valide.']);
     end
-    %Return speed in units per seconds (px/s or m/s or whatever unit was in the matrix)
+    % Return speed in units per seconds (px/s or m/s or whatever unit was in the matrix)
     Vx = vitesseX * 30; 
     Vy = vitesseY * 30;
 end

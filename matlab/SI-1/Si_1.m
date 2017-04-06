@@ -157,19 +157,13 @@ for n = 1:1:N
             BillePositions(IndexBillesPosition,:) = [xPosBille yPosBille ];
             IndexBillesPosition = IndexBillesPosition +1;
         else
-            IndexBillesPosition = 7;
-            BillePositionsSize = size(BillePositions);
-            if(BillePositionsSize(1) < 7)
-                BillePositions(IndexBillesPosition,:) = [xPosBille yPosBille ];
-            else
-                BillePositions(1,:) = BillePositions(2,:);
-                BillePositions(2,:) = BillePositions(3,:);
-                BillePositions(3,:) = BillePositions(4,:);
-                BillePositions(4,:) = BillePositions(5,:);
-                BillePositions(5,:) = BillePositions(6,:);
-                BillePositions(6,:) = BillePositions(7,:);
-                BillePositions(IndexBillesPosition,:) = [xPosBille yPosBille];
-            end
+            BillePositions(1,:) = BillePositions(2,:);
+            BillePositions(2,:) = BillePositions(3,:);
+            BillePositions(3,:) = BillePositions(4,:);
+            BillePositions(4,:) = BillePositions(5,:);
+            BillePositions(5,:) = BillePositions(6,:);
+            BillePositions(6,:) = BillePositions(7,:);
+            BillePositions(7,:) = [xPosBille yPosBille];
         end
         [vitesseX,vitesseY] = CalculVitesse(BillePositions,6);
 %If ordreMax is impossible return 0 0
