@@ -23,6 +23,10 @@ Plaque(:,:,:,10) = imread('image_1018.bmp');
 N = 10;
 Bille = imread('Bille_zmin.bmp');
 
+%Vecteur pour sauvegarder jusqua 6 position de la bille
+BillePositions = [];
+IndexBillesPosition = 1;
+
 % Images à analyser
 Plaque = im2double(Plaque(:,:,1,:));
 Bille = im2double(Bille(:,:,1));
@@ -131,7 +135,7 @@ for n = 1:1:N
     toc
     
     % Affichage du résultat de la corrélation
-    figure, surf(correlation), shading flat %Afficher le resultat de la correlation
+    % figure, surf(correlation), shading flat %Afficher le resultat de la correlation
     
     % Seuillage pour déterminer si la bille est présente ou non
     if correlation(ypeak, xpeak) > 20
@@ -142,17 +146,36 @@ for n = 1:1:N
        yPosBille = -1;
     end
     
-    
     % Dessin d'un point sur la bille si elle est présente
     hFig = figure;
     hAx  = axes;
     imshow(Plaque(:,:,1,n),'Parent', hAx);
     hold on;
-    
-    % Si la bille est présente, on affiche sa position
-    if isBillePresente
+    % Si la bille est présente,on sauvegarde jusqua 7 position et on affiche sa position
+    if isBillePresente       
+        if(IndexBillesPosition < 7)
+            BillePositions(IndexBillesPosition,:) = [xPosBille yPosBille ];
+            IndexBillesPosition = IndexBillesPosition +1;
+        else
+            IndexBillesPosition = 7;
+            BillePositionsSize = size(BillePositions);
+            if(BillePositionsSize(1) < 7)
+                BillePositions(IndexBillesPosition,:) = [xPosBille yPosBille ];
+            else
+                BillePositions(1,:) = BillePositions(2,:);
+                BillePositions(2,:) = BillePositions(3,:);
+                BillePositions(3,:) = BillePositions(4,:);
+                BillePositions(4,:) = BillePositions(5,:);
+                BillePositions(5,:) = BillePositions(6,:);
+                BillePositions(6,:) = BillePositions(7,:);
+                BillePositions(IndexBillesPosition,:) = [xPosBille yPosBille];
+            end
+        end
+        [vitesseX,vitesseY] = CalculVitesse(BillePositions,6);
+%If ordreMax is impossible return 0 0
         plot(xPosBille, yPosBille,'b.','MarkerSize',20)
         disp(['La bille est presente à x:', num2str(xPosBille), ' y:', num2str(yPosBille)]);
+        disp(['La bille a une vitesse x:', num2str(vitesseX), ' y:', num2str(vitesseY)]);
     else
         disp('La bille n''est pas presente');
     end
