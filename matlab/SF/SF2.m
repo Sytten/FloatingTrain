@@ -51,9 +51,16 @@ result2 = displaySeuil(yz2,3);
 result3 = displaySeuil(yz3,2);
 result4 = displaySeuil(yz4,4);
 
+result1 = result1+result3;
+result2 = result2+result4;
 
-result = [result1+result3,baud(:,1),zeros(length(result1),1),result2+result4, baud(:,2)];
+%% Calcul du BER
+erreur1 = BER(baud(:,1),result1)
+erreur2 = BER(baud(:,2),result2)
+
+%% Ecriture dans un csv
+write = [result1,result2, baud];
 delete('res.csv')
-csvwrite('res.csv', result);
+csvwrite('res.csv', write);
 
     

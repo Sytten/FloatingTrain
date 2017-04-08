@@ -9,8 +9,8 @@ clc
 
 load('signaux.mat')
 
-signal = signal_3a_2;
-baud = baud_3a_2;
+signal = signal_3a_1;
+baud = baud_3a_1;
 
 [x64, y64, Fs] = passeBasDownsample(signal, time);
 
@@ -65,8 +65,19 @@ result4 = displaySeuil(yz4,2);
 result5 = displaySeuil(yz5,4);
 result6 = displaySeuil(yz6,6);
 
-result = [result1+result4,baud(:,1),result2+result5, baud(:,2),result3+result6, baud(:,3)];
+result1 = result1+result4;
+result2 = result2+result5;
+result3 = result3+result6;
+
+%% Calcul du BSR
+
+erreur1 = BER(baud(:,1),result1)
+erreur2 = BER(baud(:,2),result2)
+erreur3 = BER(baud(:,3),result3)
+
+%% Ecriture dans un csv
+write = [result1, result2, result3, baud];
 delete('res.csv')
-csvwrite('res.csv', result);
+csvwrite('res.csv', write);
 
     

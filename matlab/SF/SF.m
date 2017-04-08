@@ -9,8 +9,8 @@ clc
 
 load('signaux.mat')
 
-signal = signal_1a;
-baud = baud_1a;
+signal = signal_1b;
+baud = baud_1b;
 
 [x64, y64, Fs] = passeBasDownsample(signal, time);
 
@@ -39,8 +39,16 @@ plot(x64,abs(fft(yz2)))
 result1 = displaySeuil(yz1,1);
 result2 = displaySeuil(yz2,2);
 
-result = [result1+result2, baud];
+result = result1+result2;
+
+%% calcul du BER
+erreur = BER(baud,result)
+
+%% Ecriture dans un fichier csv
+write = [result, baud];
 delete('res.csv')
-csvwrite('res.csv', result);
+csvwrite('res.csv', write);
+
+
 
     
