@@ -12,7 +12,6 @@ load('signaux.mat')
 signal = signal_2a;
 baud = baud_2a;
 
-
 [x64, y64, Fs] = passeBasDownsample(signal, time);
 
 %% filter with cheby

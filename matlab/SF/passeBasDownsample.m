@@ -16,11 +16,11 @@ function [ x64, y64, Fs ] = passeBasDownsample( signal, time )
     % plot(x,abs(fft(signal_osc)))
 
     % coupe bande à pi/64
-    n = -20:19;
+    n = -1000:999;
     filt = sinc(1/64*n)/64;
     h1 = filt .* hamming(length(n))';
-    % figure
-    % l = 1;plot(0:l/length(n):l-l/length(n),abs(fft(h)));
+    figure
+    l = 1;plot(0:l/length(n):l-l/length(n),abs(fft(h1)));
 
     % filtrer avec le coupe bande
     y = filtfilt(h1,1,signal_osc);
