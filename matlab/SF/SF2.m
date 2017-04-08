@@ -64,6 +64,9 @@ plot(x64,abs(fft(yz1)))
 plot(x64,abs(fft(yz2)))
 
 %% redressage 
+close all
+clc
+
 threshold = [displaySeuil(yz1) displaySeuil(yz2)];
 
 %% reconstruct bits 
