@@ -3,17 +3,17 @@ function [ x64, y64, Fs ] = passeBasDownsample( signal, time )
     Fs = 50.688 * 10^6;
     dx = Fs/length(signal);
     x = 0:dx:Fs-dx;
-    % figure
-    % plot(x,abs(fft(signal)))
+%     figure
+%     plot(x,abs(fft(signal)))
 
     % oscillateur local
     LO2 = 10.7 * 10^6 - Fs/128/2;
-    Osc = sin(2*pi*LO2*time);
+    Osc = sin(2*pi*LO2*time)*2;
 
     % déplacer le signal
     signal_osc = signal .* Osc;
-    % figure
-    % plot(x,abs(fft(signal_osc)))
+%     figure
+%     plot(x,abs(fft(signal_osc)))
 
     % coupe bande à pi/64
     n = -1000:999;
