@@ -72,6 +72,8 @@ private:
 	int FFT(int dir,int m,float *x,float *y);
 	// Lower power of two
 	int Powerof2(int n,int *m,int *twopm);
+    void convolution(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY);
+	void PositionBille(complex<float>** correlation, int tailleX, int tailleY, float seuil, int* outPosX, int* outPosY);
 
 	const float billeNorm[SIZE_BILLE*SIZE_BILLE] = { 	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.249586776859504,	0.249586776859504,	0.0613514827418568,	0.0613514827418568,	0.143704423918327,	0.143704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,										
 													0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.249586776859504,	0.249586776859504,	0.0613514827418568,	0.0613514827418568,	0.143704423918327,	0.143704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,
@@ -123,14 +125,69 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	int cropH = 480;
 	int cropX = 0;
 	int cropY = 0;
-	int outW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
-	int outH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
+	int padW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
+	int padH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
 
-	float* platNormPad = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, outW, outH);
-	float* billeNormPad = PadBille(DummyImageProcessingPlugin::billeNorm, outH, outW);
+	float* platNormPad = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
+	float* billeNormPad = PadBille(DummyImageProcessingPlugin::billeNorm, padH, padW);
+	
+	complex<float>** PlateauComplex = new complex<float>* [padH];  	// Creer une matrice de complex pour le plateau
+	complex<float>** BilleComplex = new complex<float>* [padH];    // Creer une matrice de complex pour la bille
 
-	cout << "red pixel 1 norm: " << platNormPad[499] << endl;
-	cout << "bille pixel 1 norm: " <<billeNormPad[512] << endl;
+	// Each real of complex matrix is set to a pixel value and imag = 0
+	for(int height = 0; height < padH; height++)
+	{
+	    PlateauComplex[height] = new complex<float>[padW];		
+		BilleComplex[height] = new complex<float>[padW];		
+		for(int width = 0; width < padW; width++)
+		{
+			PlateauComplex[height][width].real(platNormPad[width+height*padH]);
+			PlateauComplex[height][width].imag(0.0);		  
+			BilleComplex[height][width].real(billeNormPad[width+height*padH]);
+			BilleComplex[height][width].imag(0.0);	
+		}
+	}
+
+	if( FFT2D(PlateauComplex,padW,padH,-1) ) //Forward FFT 
+   {
+		cout << "FFT Plateau sucessful" << endl;
+		cout<<PlateauComplex[0][0].real()  << " " << PlateauComplex[0][0].imag() << "j" << endl;
+		cout<< PlateauComplex[0][1].real()  << " " << PlateauComplex[0][1].imag() << "j" << endl;
+		cout<< PlateauComplex[0][2].real()  << " " << PlateauComplex[0][2].imag() << "j" << endl;
+   }
+	else
+	{
+		cout << "FFT Failed" << endl;
+	}
+
+	if( FFT2D(BilleComplex,padW,padH,-1) ) //Forward FFT 
+   {
+		cout << "FFT Bille sucessful" << endl;
+		cout<<BilleComplex[0][0].real()  << " " << BilleComplex[0][0].imag() << "j" << endl;
+		cout<< BilleComplex[0][1].real()  << " " << BilleComplex[0][1].imag() << "j" << endl;
+		cout<< BilleComplex[0][2].real()  << " " << BilleComplex[0][2].imag() << "j" << endl;
+   }
+	else
+	{
+		cout << "FFT Failed" << endl;
+	}
+	// Convolution 
+	convolution(PlateauComplex, BilleComplex, padW,padH);	
+	if ( FFT2D(PlateauComplex, padW,padH,1) )// Reverse FFT
+	{
+		cout << "Correlation succesful" << endl;
+	}
+	else
+	{
+		cout << "Correlation Failed!!!" << endl;		
+	}
+
+   // Seuil
+	int PositionX,PositionY;   
+    PositionBille(PlateauComplex,padW,padH, 25, &PositionX,&PositionY);
+
+	cout << "PositionX : " << PositionX << endl;
+	cout << "PositionY: " << PositionY << endl;
 
 	delete platNormPad;
 	delete billeNormPad;
@@ -382,8 +439,53 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		  return(true);
 	}
 
-
-
+	// Executes pixel by pixel multiplication places result in fft1
+	void DummyImageProcessingPlugin::convolution(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY)
+	{
+       
+		for (int i = 0; i < sizeX; i++)
+		{
+			for(int j = 0; j < sizeY; j++)
+			{
+				fft1[i][j].real( fft1[i][j].real() * fft2[i][j].real() );
+				fft1[i][j].imag( fft1[i][j].imag() * fft2[i][j].imag() );
+			}
+		}
+	}
+	
+	// Retourne la position de la bille dans le tableau de la corrélation
+	void DummyImageProcessingPlugin::PositionBille(complex<float>** correlation, int tailleX, int tailleY, float seuil, int* outPosX, int* outPosY)
+	{
+		int posX_max = -1;
+		int posY_max = -1;
+		float val_max = 0.0;
+	
+		// Trouve la valeur maximale de la corrélation
+		for(int height = 0; height < tailleY; height++)
+		{
+			for(int width = 0; width < tailleX; width++)
+			{
+				if(abs(correlation[height][width]) > val_max)
+				{
+					val_max = abs(correlation[height][width]);
+					posX_max = width;
+					posY_max = height;
+				}
+			}
+		}
+	
+		// Si la valeur maximale est plus grande que le seuil, on retourne la position de la bille
+		if(val_max > seuil)
+		{
+			*outPosX = posX_max;
+			*outPosY = posY_max;
+		}
+		else
+		{
+			*outPosX = -1;
+			*outPosY = -1;
+		}
+	}
 
 
 
