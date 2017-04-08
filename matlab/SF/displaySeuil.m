@@ -1,4 +1,4 @@
-function [seuil] = displaySeuil(yz)
+function [result] = displaySeuil(yz, symbol)
 n = 12;
 pts = [];
 
@@ -7,14 +7,30 @@ for i = 1:n:length(yz)
    pts = [pts, m];
 end
 
-lgt = 1:length(pts);
-f = fit(lgt',pts','b*x^m');
-seuil = f.b;
+moyenne = []
+
+for j = 1:length(pts)
+    
+    moyenne1 = sum(pts(j:j+29))/30;
+    moyenne = [moyenne, moyenne1];
+     
+end
+
 
 figure 
 hold on
 plot(pts,'o')
-plot([0, length(pts)],[seuil seuil])
+plot(moyenne, '*')
 hold off
+
+
+result = [];
+for i = 1:length(pts)
+    bit = 0;
+    bit = symbol*bitValue(pts(i),moyenne(i));
+    result = [result; bit];
+end
+
+
 end
 

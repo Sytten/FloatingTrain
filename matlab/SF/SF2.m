@@ -9,8 +9,8 @@ clc
 
 load('signaux.mat')
 
-signal = signal_2a;
-baud = baud_2a;
+signal = signal_2b;
+baud = baud_2b;
 
 [x64, y64, Fs] = passeBasDownsample(signal, time);
 
@@ -55,7 +55,7 @@ threshold = [displaySeuil(yz1) displaySeuil(yz2) displaySeuil(yz3) displaySeuil(
 [ result3 ] = demodAM1(yz3,2, threshold(3));
 [ result4 ] = demodAM1(yz4,4, threshold(4));
 
-result = [result1+result3,baud(:,1),result2+result4, baud(:,2)];
+result = [result1+result3,baud(:,1),zeros(length(result1),1),result2+result4, baud(:,2)];
 delete('res.csv')
 csvwrite('res.csv', result);
 
