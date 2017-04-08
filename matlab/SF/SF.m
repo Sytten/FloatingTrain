@@ -1,7 +1,7 @@
 % Auteur : Julien Larochelle, Philippe Girard
 % Date de creation :  1 avril 2017
 % Date d'edition : avril 2017
-% Description du programme : RFIDs
+% Description du programme : RFID
 
 close all
 clear all
@@ -64,9 +64,6 @@ plot(x64,abs(fft(yz1)))
 plot(x64,abs(fft(yz2)))
 
 %% redressage 
-close all
-clc
-
 threshold = [displaySeuil(yz1) displaySeuil(yz2)];
 
 %% reconstruct bits 
