@@ -1,6 +1,6 @@
-function [ pts ] = displaySeuil(yz, threshold)
-n = 12
-pts = []
+function [seuil] = displaySeuil(yz)
+n = 12;
+pts = [];
 
 for i = 1:n:length(yz)
    m = sqrt(mean((yz(i:i+n-1).*triang(n)).^2));
@@ -8,14 +8,13 @@ for i = 1:n:length(yz)
 end
 
 lgt = 1:length(pts);
-
 f = fit(lgt',pts','b*x^m');
 seuil = f.b;
 
-
 figure 
-plot(pts,'o')
 hold on
-plot([0,length(pts)],[seuil, seuil])
+plot(pts,'o')
+plot([0, length(pts)],[seuil seuil])
+hold off
 end
 

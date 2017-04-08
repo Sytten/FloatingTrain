@@ -1,7 +1,7 @@
 % Auteur : Julien Larochelle, Philippe Girard
 % Date de creation :  1 avril 2017
 % Date d'edition : avril 2017
-% Description du programme : RFID
+% Description du programme : RFID 1 émetteur
 
 close all
 clear all
@@ -9,21 +9,24 @@ clc
 
 load('signaux.mat')
 
+signal = signal_1a;
+baud = baud_1a;
+
 % initial signal
 Fs = 50.688 * 10^6;
-dx = Fs/length(signal_1a);
+dx = Fs/length(signal);
 x = 0:dx:Fs-dx;
 % figure
-% plot(x,abs(fft(signal_1a)))
+% plot(x,abs(fft(signal)))
 
 % oscillateur local
 LO2 = 10.7 * 10^6 - Fs/128/2;
 Osc = sin(2*pi*LO2*time);
 
 % déplacer le signal
-signal_1a_osc = signal_1a .* Osc;
+signal_osc = signal .* Osc;
 % figure
-% plot(x,abs(fft(signal_1a_osc)))
+% plot(x,abs(fft(signal_osc)))
 
 % coupe bande à pi/64
 n = -20:19;
@@ -33,7 +36,7 @@ h1 = filt .* hamming(length(n))';
 % l = 1;plot(0:l/length(n):l-l/length(n),abs(fft(h)));
 
 % filtrer avec le coupe bande
-y = filtfilt(h1,1,signal_1a_osc);
+y = filtfilt(h1,1,signal_osc);
 figure
 plot(x,abs(fft(y)))
 
@@ -70,7 +73,7 @@ threshold = [displaySeuil(yz1) displaySeuil(yz2)];
 [ result1 ] = demodAM1(yz1,1, threshold(1));
 [ result2 ] = demodAM1(yz2,2, threshold(2));
 
-result = [result1+result2, baud_1a];
+result = [result1+result2, baud];
 delete('res.csv')
 csvwrite('res.csv', result);
 
