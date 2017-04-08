@@ -5,7 +5,7 @@
 
 int main()
 {
-	DummyImageProcessingPlugin iPP() = new DummyImageProcessingPlugin();
+	DummyImageProcessingPlugin* iPP = new DummyImageProcessingPlugin();
 		
 	double x = 1.0;
 	double y = 1.0;
