@@ -1,7 +1,7 @@
 % Auteur : Julien Larochelle, Philippe Girard
 % Date de creation :  1 avril 2017
 % Date d'edition : avril 2017
-% Description du programme : RFID
+% Description du programme : RFIDs
 
 close all
 clear all
