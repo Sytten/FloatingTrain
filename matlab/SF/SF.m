@@ -9,8 +9,8 @@ clc
 
 load('signaux.mat')
 
-signal = signal_1b;
-baud = baud_1b;
+signal = signal_1a;
+baud = baud_1a;
 
 [x64, y64, Fs] = passeBasDownsample(signal, time);
 
@@ -34,16 +34,12 @@ hold on
 plot(x64,abs(fft(yz1)))
 plot(x64,abs(fft(yz2)))
 
-%% redressage 
+%% redressage et reconstruction bits
 
-test1 = displaySeuil(yz1,1);
-test2 = displaySeuil(yz2,2);
+result1 = displaySeuil(yz1,1);
+result2 = displaySeuil(yz2,2);
 
-%% reconstruct bits 
-[ result1 ] = demodAM1(yz1,1, threshold(1));
-[ result2 ] = demodAM1(yz2,2, threshold(2));
-
-result = [test1+test1, baud];
+result = [result1+result2, baud];
 delete('res.csv')
 csvwrite('res.csv', result);
 

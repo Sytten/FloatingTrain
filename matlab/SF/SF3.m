@@ -56,18 +56,14 @@ plot(x64,abs(fft(yz4)))
 plot(x64,abs(fft(yz5)))
 plot(x64,abs(fft(yz6)))
 
-%% redressage 
+%% redressage et reconstruction bits
 
-threshold = [displaySeuil(yz1) displaySeuil(yz2) displaySeuil(yz3) displaySeuil(yz4) displaySeuil(yz5) displaySeuil(yz6)];
-
-
-%% reconstruct bits 
-[ result1 ] = demodAM1(yz1,1, threshold(1));
-[ result2 ] = demodAM1(yz2,3, threshold(2));
-[ result3 ] = demodAM1(yz3,5, threshold(3));
-[ result4 ] = demodAM1(yz4,2, threshold(4));
-[ result5 ] = demodAM1(yz4,4, threshold(5));
-[ result6 ] = demodAM1(yz4,6, threshold(6));
+result1 = displaySeuil(yz1,1);
+result2 = displaySeuil(yz2,3);
+result3 = displaySeuil(yz3,5);
+result4 = displaySeuil(yz4,2);
+result5 = displaySeuil(yz5,4);
+result6 = displaySeuil(yz6,6);
 
 result = [result1+result4,baud(:,1),result2+result5, baud(:,2),result3+result6, baud(:,3)];
 delete('res.csv')
