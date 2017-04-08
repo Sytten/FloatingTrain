@@ -65,7 +65,7 @@ plot(x64,abs(fft(yz2)))
 
 %% redressage 
 threshold = 0.0125;
-displaySeuil(yz1,threshold);
+pts = displaySeuil(yz1,threshold);
 displaySeuil(yz2,threshold);
 
 %% reconstruct bits 

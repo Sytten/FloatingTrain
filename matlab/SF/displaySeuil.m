@@ -1,4 +1,4 @@
-function [  ] = displaySeuil(yz, threshold)
+function [ pts ] = displaySeuil(yz, threshold)
 n = 12
 pts = []
 for i = 1:n:length(yz)
