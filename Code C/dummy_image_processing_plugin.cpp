@@ -11,6 +11,7 @@
 //Si vous utilisez une librairie externe le code source doit tenir ici.
 #include <cstdint>
 #include <iostream>
+#include <complex>
 #include "image_processing_plugin.h"
 using namespace std;
 
@@ -65,7 +66,12 @@ private:
 
 // Padding de la bille normalisée
 	float* PadBille(const float* billeNorm, unsigned int outHeight, unsigned int outWidth);
-	int NextPowerOfTwo(int size);
+	// Higher power of two
+	int NextPowerOfTwo(int num);
+	int FFT2D(complex<float> **c,int nx,int ny,int dir);
+	int FFT(int dir,int m,float *x,float *y);
+	// Lower power of two
+	int Powerof2(int n,int *m,int *twopm);
 
 	const float billeNorm[SIZE_BILLE*SIZE_BILLE] = { 	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.249586776859504,	0.249586776859504,	0.0613514827418568,	0.0613514827418568,	0.143704423918327,	0.143704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,										
 													0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.249586776859504,	0.249586776859504,	0.0613514827418568,	0.0613514827418568,	0.143704423918327,	0.143704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,	0.343704423918327,
@@ -124,7 +130,7 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	float* billeNormPad = PadBille(DummyImageProcessingPlugin::billeNorm, outH, outW);
 
 	cout << "red pixel 1 norm: " << platNormPad[499] << endl;
-	cout << "bille pixel 1 norm: " <<billeNormPad[501] << endl;
+	cout << "bille pixel 1 norm: " <<billeNormPad[512] << endl;
 
 	delete platNormPad;
 	delete billeNormPad;
@@ -193,11 +199,188 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 	{
 		powOfTwo = (int) pow(2.0, exponent);
 		exponent += 1.0;
-		cout << "Power of 2: " << powOfTwo << endl;
 	}while(num > powOfTwo);
 
 	return powOfTwo;
 }
+
+/*-------------------------------------------------------------------------
+   Perform a 2D FFT inplace given a complex 2D array
+   The direction dir, 1 for forward, -1 for reverse
+   The size of the array (nx,ny)
+   Return false if there are memory problems or
+      the dimensions are not powers of 2
+*/
+	int DummyImageProcessingPlugin::FFT2D(complex<float> **c,int nx,int ny,int dir)
+	{
+	   int i,j;
+	   int m,twopm;
+	   float *real,*imag;
+
+	   /* Transform the rows */
+	   real = (float *)malloc(nx * sizeof(float));
+	   imag = (float *)malloc(nx * sizeof(float));
+	   if (real == NULL || imag == NULL)
+		  return(false);
+	   if (!Powerof2(nx,&m,&twopm) || twopm != nx)
+		  return(false);
+	   for (j=0;j<ny;j++) {
+		  for (i=0;i<nx;i++) {
+		     real[i] = c[i][j].real();
+		     imag[i] = c[i][j].imag();
+		  }
+		  FFT(dir,m,real,imag);
+		  for (i=0;i<nx;i++) {
+		     c[i][j].real(real[i]);
+		     c[i][j].imag(imag[i]);
+		  }
+	   }
+	   free(real);
+	   free(imag);
+
+	   /* Transform the columns */
+	   real = (float *)malloc(ny * sizeof(float));
+	   imag = (float *)malloc(ny * sizeof(float));
+	   if (real == NULL || imag == NULL)
+		  return(false);
+	   if (!Powerof2(ny,&m,&twopm) || twopm != ny)
+		  return(false);
+	   for (i=0;i<nx;i++) {
+		  for (j=0;j<ny;j++) {
+		     real[j] = c[i][j].real();
+		     imag[j] = c[i][j].imag();
+		  }
+		  FFT(dir,m,real,imag);
+		  for (j=0;j<ny;j++) {
+		     c[i][j].real(real[j]);
+		     c[i][j].imag(imag[j]);
+		  }
+	   }
+	   free(real);
+	   free(imag);
+
+	   return(true);
+	}
+
+	/*-------------------------------------------------------------------------
+	   This computes an in-place complex-to-complex FFT
+	   x and y are the real and imaginary arrays of 2^m points.
+	   dir =  1 gives forward transform
+	   dir = -1 gives reverse transform
+
+		 Formula: forward
+		              N-1
+		              ---
+		          1   \          - j k 2 pi n / N
+		  X(n) = ---   >   x(k) e                    = forward transform
+		          N   /                                n=0..N-1
+		              ---
+		              k=0
+
+		  Formula: reverse
+		              N-1
+		              ---
+		              \          j k 2 pi n / N
+		  X(n) =       >   x(k) e                    = forward transform
+		              /                                n=0..N-1
+		              ---
+		              k=0
+	*/
+	int DummyImageProcessingPlugin::FFT(int dir,int m,float *x,float *y)
+	{
+	   long nn,i,i1,j,k,i2,l,l1,l2;
+	   float c1,c2,tx,ty,t1,t2,u1,u2,z;
+
+	   /* Calculate the number of points */
+	   nn = 1;
+	   for (i=0;i<m;i++)
+		  nn *= 2;
+
+	   /* Do the bit reversal */
+	   i2 = nn >> 1;
+	   j = 0;
+	   for (i=0;i<nn-1;i++) {
+		  if (i < j) {
+		     tx = x[i];
+		     ty = y[i];
+		     x[i] = x[j];
+		     y[i] = y[j];
+		     x[j] = tx;
+		     y[j] = ty;
+		  }
+		  k = i2;
+		  while (k <= j) {
+		     j -= k;
+		     k >>= 1;
+		  }
+		  j += k;
+	   }
+
+	   /* Compute the FFT */
+	   c1 = -1.0;
+	   c2 = 0.0;
+	   l2 = 1;
+	   for (l=0;l<m;l++) {
+		  l1 = l2;
+		  l2 <<= 1;
+		  u1 = 1.0;
+		  u2 = 0.0;
+		  for (j=0;j<l1;j++) {
+		     for (i=j;i<nn;i+=l2) {
+		        i1 = i + l1;
+		        t1 = u1 * x[i1] - u2 * y[i1];
+		        t2 = u1 * y[i1] + u2 * x[i1];
+		        x[i1] = x[i] - t1;
+		        y[i1] = y[i] - t2;
+		        x[i] += t1;
+		        y[i] += t2;
+		     }
+		     z =  u1 * c1 - u2 * c2;
+		     u2 = u1 * c2 + u2 * c1;
+		     u1 = z;
+		  }
+		  c2 = sqrt((1.0 - c1) / 2.0);
+		  if (dir == 1)
+		     c2 = -c2;
+		  c1 = sqrt((1.0 + c1) / 2.0);
+	   }
+
+	   /* Scaling for forward transform */
+	   if (dir == 1) {
+		  for (i=0;i<nn;i++) {
+		     x[i] /= (float)nn;
+		     y[i] /= (float)nn;
+		  }
+	   }
+
+	   return(true);
+	}
+
+	/*-------------------------------------------------------------------------
+	   Calculate the closest but lower power of two of a number
+	   twopm = 2**m <= n
+	   Return TRUE if 2**m == n
+	*/
+	int DummyImageProcessingPlugin::Powerof2(int n,int *m,int *twopm)
+	{
+	   if (n <= 1) {
+		  *m = 0;
+		  *twopm = 1;
+		  return(false);
+	   }
+
+	   *m = 1;
+	   *twopm = 2;
+	   do {
+		  (*m)++;
+		  (*twopm) *= 2;
+	   } while (2*(*twopm) <= n);
+
+	   if (*twopm != n)
+		  return(false);
+	   else
+		  return(true);
+	}
 
 
 
