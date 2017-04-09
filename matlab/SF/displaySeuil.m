@@ -1,7 +1,7 @@
 function [result] = displaySeuil(yz, symbol)
 n = 12;
 pts = [];
-long = 45;
+long = 50;
 
 % Determination du nuage de points
 for i = 1:n:length(yz)
@@ -18,7 +18,6 @@ for j = 1:length(pts)-long
      
 end
 moyenne(810-long:810) = moyenne(810-long-1);
-
 
 figure 
 hold on

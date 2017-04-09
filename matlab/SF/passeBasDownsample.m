@@ -16,14 +16,22 @@ function [ x64, y64, Fs ] = passeBasDownsample( signal, time )
 %   plot(x,abs(fft(signal_osc)))
 
     % coupe bande à pi/64
-    n = -1000:999;
+    n = -10:9;
     filt = sinc(1/64*n)/64;
     h1 = filt .* hamming(length(n))';
     figure
     l = 1;plot(0:l/length(n):l-l/length(n),abs(fft(h1)));
 
     % filtrer avec le coupe bande
-    y = filtfilt(h1,1,signal_osc);
+    
+    [gd, w] = grpdelay(h1,1,n);
+    
+    signal_osc = [signal_osc; zeros(round(max(gd)),1)];
+    
+    y = filter(h1,1,signal_osc);
+    
+    y = y(round(max(gd))+1:end);
+    
     figure
     plot(x,abs(fft(y)))
 

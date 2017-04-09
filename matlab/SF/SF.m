@@ -9,14 +9,15 @@ clc
 
 load('signaux.mat')
 
-signal = signal_1b;
-baud = baud_1b;
+signal = signal_1a;
+baud = baud_1a;
 
 [x64, y64, Fs] = passeBasDownsample(signal, time);
 
 %% filter with cheby
 [b1,a1] = filtreCheby(-82500,Fs,4000000);
 [b2,a2] = filtreCheby(82500,Fs,4000000);
+
 h1 = freqz(b1,a1,length(x64)/2);
 h2 = freqz(b2,a2,length(x64)/2);
 
