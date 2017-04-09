@@ -25,32 +25,32 @@ namespace {
 
 int main( int argc, char **argv)
 {
-	if(argc != 2)
-	{
-		cerr << "Erreur: Vous devez specifier seulement l'image a charger" << endl;
-		return EXIT_FAILURE;
-	}
-
 	// Open image file
-	ifstream image_file(argv[1], ios::binary);
-	if(!image_file)
-	{
-		cerr << "Erreur: Chemin de l'image invalide" << endl;
-		return EXIT_FAILURE;
-	}
-
-	// Check file size
-	image_file.seekg(0, image_file.end);
-	if(image_file.tellg() != IMAGE_SIZE)
-	{
-		cerr << "Erreur: La taille de l'image specifiee est incorrecte" << endl;
-		return EXIT_FAILURE;
-	}
-	image_file.seekg(0, image_file.beg);
+	ifstream image_file_1("image_718.rgb", ios::binary);
+	ifstream image_file_2("image_751.rgb", ios::binary);
+	ifstream image_file_3("image_785.rgb", ios::binary);
+	ifstream image_file_4("image_818.rgb", ios::binary);
+	ifstream image_file_5("image_852.rgb", ios::binary);
+	ifstream image_file_6("image_884.rgb", ios::binary);
 
 	// Read file
-	boost::shared_array<uint8_t> image(new uint8_t[IMAGE_SIZE]);
-	image_file.read(reinterpret_cast<char *>(image.get()), IMAGE_SIZE);
+	boost::shared_array<uint8_t> image_1(new uint8_t[IMAGE_SIZE]);
+	image_file_1.read(reinterpret_cast<char *>(image_1.get()), IMAGE_SIZE);
+	
+	boost::shared_array<uint8_t> image_2(new uint8_t[IMAGE_SIZE]);
+	image_file_2.read(reinterpret_cast<char *>(image_2.get()), IMAGE_SIZE);
+	
+	boost::shared_array<uint8_t> image_3(new uint8_t[IMAGE_SIZE]);
+	image_file_3.read(reinterpret_cast<char *>(image_3.get()), IMAGE_SIZE);
+	
+	boost::shared_array<uint8_t> image_4(new uint8_t[IMAGE_SIZE]);
+	image_file_4.read(reinterpret_cast<char *>(image_4.get()), IMAGE_SIZE);
+	
+	boost::shared_array<uint8_t> image_5(new uint8_t[IMAGE_SIZE]);
+	image_file_5.read(reinterpret_cast<char *>(image_5.get()), IMAGE_SIZE);
+	
+	boost::shared_array<uint8_t> image_6(new uint8_t[IMAGE_SIZE]);
+	image_file_6.read(reinterpret_cast<char *>(image_6.get()), IMAGE_SIZE);
 
 	// Votre code ici: l'image est un tableau lineaire de uint8.
 	// Chaque pixel contient 3 uint8 soit les composantes: Red, Green, Blue (expliquant le "*3" dans IMAGE_SIZE)
@@ -63,11 +63,12 @@ int main( int argc, char **argv)
 	double x = 1.0;
 	double y = 1.0;
 
-	iPP->OnBallPosition(1.0, 1.0, x, y);
-
-	cout << "red pixel 1: " << (int)(image.get())[2] << endl;
-	
-	iPP->OnImage(image, 480, 480, x, y);
+	iPP->OnImage(image_1, 480, 480, x, y);
+	iPP->OnImage(image_2, 480, 480, x, y);
+	iPP->OnImage(image_3, 480, 480, x, y);
+	iPP->OnImage(image_4, 480, 480, x, y);
+	iPP->OnImage(image_5, 480, 480, x, y);
+	iPP->OnImage(image_6, 480, 480, x, y);
 
 	delete iPP;
 
