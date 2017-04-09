@@ -120,13 +120,24 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	out_dXPos = -1.0;
 	out_dYPos = -1.0;
 
-	int seuil = 25;
+	int seuil = 20;
 	int FORWARD = -1;
 	int REVERSE = 1;
 	int cropW = 480;
 	int cropH = 480;
 	int cropX = 0;
 	int cropY = 0;
+
+	// Checks to make sure we don't try to crop out of bounds
+	if(cropX+cropW > in_unWidth)
+	{
+		cropW -= (cropX + cropW) - in_unWidth;
+	}
+	if(cropY+cropH > in_unHeight)
+	{
+		cropH -= (cropY + cropH) - in_unHeight;
+	}
+
 	int padW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
 	int padH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
 
@@ -171,17 +182,6 @@ void DummyImageProcessingPlugin::OnBallPosition(double in_dXPos, double in_dYPos
 complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight)
 {
 	complex<float>** plateauPad = new complex<float>* [outHeight]();
-	//float* plateauPad = new float[outWidth*outHeight]();
-	
-	// Checks to make sure we don't try to crop out of bounds
-	if(cropX+cropWidth > inWidth)
-	{
-		cropWidth -= (cropX + cropWidth) - inWidth;
-	}
-	if(cropY+cropHeight > inHeight)
-	{
-		cropHeight -= (cropY + cropHeight) - inHeight;
-	}
 
 	for(int height = 0; height < outHeight; height++)
 	{
@@ -206,7 +206,6 @@ complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_
 // Padding de la bille normalisée
 complex<float>** DummyImageProcessingPlugin::PadBille(const float* billeNorm, unsigned int outHeight, unsigned int outWidth)
 {
-	//float* billeNormPad = new float[outHeight*outWidth]();
 	complex<float>** billeNormPad = new complex<float>* [outHeight](); 
 	
 
@@ -219,7 +218,6 @@ complex<float>** DummyImageProcessingPlugin::PadBille(const float* billeNorm, un
 	{
 		for(int width = 0; width < SIZE_BILLE; width++)
 		{
-			//billeNormPad[width + outWidth*height] = billeNorm[width + SIZE_BILLE*height];
 			billeNormPad[height][width].real(billeNorm[width + SIZE_BILLE*height]);
 		}
 	}
@@ -451,6 +449,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 				}
 			}
 		}
+		cout << "v: " << val_max << " x: " << posX_max << "y: " << posY_max << endl;
 	
 		// Si la valeur maximale est plus grande que le seuil, on retourne la position de la bille
 		if(val_max > seuil)
