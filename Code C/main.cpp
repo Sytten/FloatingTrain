@@ -62,14 +62,34 @@ int main( int argc, char **argv)
 		
 	double x = 1.0;
 	double y = 1.0;
-
+	
+	double vX;
+	double vY;
+	
 	iPP->OnImage(image_1, 480, 480, x, y);
+	iPP->OnBallPosition(x,y,vX,vY);
+	cout << "Vitesse X : " << vX << "  Y: " << vY << endl;
+	
 	iPP->OnImage(image_2, 480, 480, x, y);
-	iPP->OnImage(image_3, 480, 480, x, y);
-	iPP->OnImage(image_4, 480, 480, x, y);
-	iPP->OnImage(image_5, 480, 480, x, y);
-	iPP->OnImage(image_6, 480, 480, x, y);
+	iPP->OnBallPosition(x,y,vX,vY);
+	cout << "Vitesse X : " << vX << "  Y: " << vY << endl;
 
+	iPP->OnImage(image_3, 480, 480, x, y);
+	iPP->OnBallPosition(x,y,vX,vY);
+	cout << "Vitesse X : " << vX << "  Y: " << vY << endl;
+	
+	iPP->OnImage(image_4, 480, 480, x, y);
+	iPP->OnBallPosition(x,y,vX,vY);
+	cout << "Vitesse X : " << vX << "  Y: " << vY << endl;
+	
+	iPP->OnImage(image_5, 480, 480, x, y);
+	iPP->OnBallPosition(x,y,vX,vY);
+	cout << "Vitesse X : " << vX << "  Y: " << vY << endl;
+	
+	iPP->OnImage(image_6, 480, 480, x, y);
+	iPP->OnBallPosition(x,y,vX,vY);
+	cout << "Vitesse X : " << vX << "  Y: " << vY << endl;
+	
 	delete iPP;
 
 	return EXIT_SUCCESS;
