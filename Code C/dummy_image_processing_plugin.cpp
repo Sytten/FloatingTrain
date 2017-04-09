@@ -12,15 +12,11 @@
 #include <cstdint>
 #include <iostream>
 #include <complex>
+#include <chrono>
 #include "image_processing_plugin.h"
 using namespace std;
+using namespace std::chrono; 
 
-
-struct CoordBille 
-{
-	int x;
-	int y;
-};
 
 //Modifiez cette classe-ci, vous pouvez faire littéralement ce que vous voulez y compris la renommer
 //à condition de faire un "replace all"
@@ -65,13 +61,28 @@ public:
 
 private:
 	#define SIZE_BILLE 22
+	#define FORWARD -1
+	#define REVERSE 1
 	#define ORDRE_DIFF 6
-	vector<CoordBille> PositionsBilles_Prec; //Vecteur ordonnée de la position la plus ancienne jusqua la plus récente (max 7 position enregistré)
+
+	struct CoordBille 
+	{
+		int x;
+		int y;
+	};
 	
+	int lastPosX = -1;
+	int lastPosY = -1;
+
+	vector<CoordBille> PositionsBilles_Prec; //Vecteur ordonnée de la position la plus ancienne jusqua la plus récente (max 7 position enregistré)
+
+	complex<float>** billeComplex256;
+	complex<float>** billeComplex512;
+
 	// Cree la nouvelle image du plateau, normalisée entre 0 et 1, paddé aux dimensions requises
 	complex<float>** PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight);
 
-	// Padding de la bille normalisée
+// Padding de la bille normalisée
 	complex<float>** PadBille(const float* billeNorm, unsigned int outHeight, unsigned int outWidth);
 	// Higher power of two
 	int NextPowerOfTwo(int num);
@@ -81,84 +92,140 @@ private:
 	int Powerof2(int n,int *m,int *twopm);
     void MultiplicationComplexe(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY);
 	void PositionBille(complex<float>** correlation, int tailleX, int tailleY, int pointXCrop, int pointYCrop, float seuil, int* outPosX, int* outPosY);
-	
 	void CalculVitesse(unsigned int ordreMax, int* out_VitesseX, int* out_VitesseY);
 
 	const float billeNorm[SIZE_BILLE*SIZE_BILLE] = { 	0.34370440, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.18292011, 0.18292011, -0.39747205, -0.39747205, -0.44060931, -0.44060931, -0.40139362, -0.40139362, -0.42492303, -0.42492303, -0.38962892, -0.38962892, -0.22492303, -0.22492303, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.18292011, 0.18292011, -0.39747205, -0.39747205, -0.44060931, -0.44060931, -0.40139362, -0.40139362, -0.42492303, -0.42492303, -0.38962892, -0.38962892, -0.22492303, -0.22492303, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, 0.17115541, 0.17115541, -0.44453087, -0.44453087, -0.48766813, -0.48766813, -0.46413872, -0.46413872, -0.39747205, -0.39747205, -0.44060931, -0.44060931, -0.068060279, -0.068060279, -0.43276617, -0.43276617, -0.32688382, -0.32688382, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, 0.17115541, 0.17115541, -0.44453087, -0.44453087, -0.48766813, -0.48766813, -0.46413872, -0.46413872, -0.39747205, -0.39747205, -0.44060931, -0.44060931, -0.068060279, -0.068060279, -0.43276617, -0.43276617, -0.32688382, -0.32688382, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, -0.29943284, -0.29943284, -0.38570735, -0.38570735, -0.32296225, -0.32296225, -0.13864851, -0.13864851, -0.12688380, -0.12688380, -0.26806030, -0.26806030, -0.31904069, -0.31904069, -0.41707990, -0.41707990, -0.47198185, -0.47198185, -0.044530869, -0.044530869,
-														0.34370443, 0.34370443, -0.29943284, -0.29943284, -0.38570735, -0.38570735, -0.32296225, -0.32296225, -0.13864851, -0.13864851, -0.12688380, -0.12688380, -0.26806030, -0.26806030, -0.31904069, -0.31904069, -0.41707990, -0.41707990, -0.47198185, -0.47198185, -0.044530869, -0.044530869,
-														0.084880896, 0.084880896, 0.022135796, 0.022135796, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.092724033, 0.092724033, 0.34370443, 0.34370443, 0.041743640, 0.041743640, -0.33080539, -0.33080539, -0.32296225, -0.32296225,
-														0.084880896, 0.084880896, 0.022135796, 0.022135796, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.092724033, 0.092724033, 0.34370443, 0.34370443, 0.041743640, 0.041743640, -0.33080539, -0.33080539, -0.32296225, -0.32296225,
-														-0.17394264, -0.17394264, -0.075903416, -0.075903416, 0.22213580, 0.22213580, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, -0.091589697, -0.091589697,
-														-0.17394264, -0.17394264, -0.075903416, -0.075903416, 0.22213580, 0.22213580, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, -0.091589697, -0.091589697,
-														-0.18962891, -0.18962891, -0.48374656, -0.48374656, -0.39355049, -0.39355049, -0.091589697, -0.091589697, 0.34370443, 0.34370443, 0.28488091, 0.28488091, 0.16331227, 0.16331227, 0.34370443, 0.34370443, 0.15939070, 0.15939070, -0.32296225, -0.32296225, -0.27982500, -0.27982500,
-														-0.18962891, -0.18962891, -0.48374656, -0.48374656, -0.39355049, -0.39355049, -0.091589697, -0.091589697, 0.34370443, 0.34370443, 0.28488091, 0.28488091, 0.16331227, 0.16331227, 0.34370443, 0.34370443, 0.15939070, 0.15939070, -0.32296225, -0.32296225, -0.27982500, -0.27982500,
-														0.014292659, 0.014292659, -0.49943283, -0.49943283, -0.46806028, -0.46806028, -0.20923676, -0.20923676, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.21429266, 0.21429266, 0.34370443, 0.34370443, -0.12296224, -0.12296224, -0.43276617, -0.43276617, -0.23276617, -0.23276617,
-														0.014292659, 0.014292659, -0.49943283, -0.49943283, -0.46806028, -0.46806028, -0.20923676, -0.20923676, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.21429266, 0.21429266, 0.34370443, 0.34370443, -0.12296224, -0.12296224, -0.43276617, -0.43276617, -0.23276617, -0.23276617,
-														0.34370443, 0.34370443, -0.45237401, -0.45237401, -0.46413872, -0.46413872, -0.30727598, -0.30727598, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, -0.30335441, -0.30335441, -0.35433480, -0.35433480, 0.32801816, 0.32801816,
-														0.34370443, 0.34370443, -0.45237401, -0.45237401, -0.46413872, -0.46413872, -0.30727598, -0.30727598, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, -0.30335441, -0.30335441, -0.35433480, -0.35433480, 0.32801816, 0.32801816,
-														0.34370443, 0.34370443, 0.12409658, 0.12409658, -0.41707990, -0.41707990, -0.41707990, -0.41707990, -0.22492303, -0.22492303, -0.18178578, -0.18178578, 0.12017501, 0.12017501, -0.33864853, -0.33864853, -0.37394264, -0.37394264, 0.033900503, 0.033900503, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, 0.12409658, 0.12409658, -0.41707990, -0.41707990, -0.41707990, -0.41707990, -0.22492303, -0.22492303, -0.18178578, -0.18178578, 0.12017501, 0.12017501, -0.33864853, -0.33864853, -0.37394264, -0.37394264, 0.033900503, 0.033900503, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.26135150, 0.26135150, -0.28766814, -0.28766814, -0.41707990, -0.41707990, -0.35825637, -0.35825637, -0.068060279, -0.068060279, -0.21315832, -0.21315832, 0.28095934, 0.28095934, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
-														0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.26135150, 0.26135150, -0.28766814, -0.28766814, -0.41707990, -0.41707990, -0.35825637, -0.35825637, -0.068060279, -0.068060279, -0.21315832, -0.21315832, 0.28095934, 0.28095934, 0.34370443, 0.34370443, 0.34370443, 0.34370443
-	};
+0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
+0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.18292011, 0.18292011, -0.39747205, -0.39747205, -0.44060931, -0.44060931, -0.40139362, -0.40139362, -0.42492303, -0.42492303, -0.38962892, -0.38962892, -0.22492303, -0.22492303, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
+0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.18292011, 0.18292011, -0.39747205, -0.39747205, -0.44060931, -0.44060931, -0.40139362, -0.40139362, -0.42492303, -0.42492303, -0.38962892, -0.38962892, -0.22492303, -0.22492303, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
+0.34370443, 0.34370443, 0.17115541, 0.17115541, -0.44453087, -0.44453087, -0.48766813, -0.48766813, -0.46413872, -0.46413872, -0.39747205, -0.39747205, -0.44060931, -0.44060931, -0.068060279, -0.068060279, -0.43276617, -0.43276617, -0.32688382, -0.32688382, 0.34370443, 0.34370443,
+0.34370443, 0.34370443, 0.17115541, 0.17115541, -0.44453087, -0.44453087, -0.48766813, -0.48766813, -0.46413872, -0.46413872, -0.39747205, -0.39747205, -0.44060931, -0.44060931, -0.068060279, -0.068060279, -0.43276617, -0.43276617, -0.32688382, -0.32688382, 0.34370443, 0.34370443,
+0.34370443, 0.34370443, -0.29943284, -0.29943284, -0.38570735, -0.38570735, -0.32296225, -0.32296225, -0.13864851, -0.13864851, -0.12688380, -0.12688380, -0.26806030, -0.26806030, -0.31904069, -0.31904069, -0.41707990, -0.41707990, -0.47198185, -0.47198185, -0.044530869, -0.044530869,
+0.34370443, 0.34370443, -0.29943284, -0.29943284, -0.38570735, -0.38570735, -0.32296225, -0.32296225, -0.13864851, -0.13864851, -0.12688380, -0.12688380, -0.26806030, -0.26806030, -0.31904069, -0.31904069, -0.41707990, -0.41707990, -0.47198185, -0.47198185, -0.044530869, -0.044530869,
+0.084880896, 0.084880896, 0.022135796, 0.022135796, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.092724033, 0.092724033, 0.34370443, 0.34370443, 0.041743640, 0.041743640, -0.33080539, -0.33080539, -0.32296225, -0.32296225,
+0.084880896, 0.084880896, 0.022135796, 0.022135796, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.092724033, 0.092724033, 0.34370443, 0.34370443, 0.041743640, 0.041743640, -0.33080539, -0.33080539, -0.32296225, -0.32296225,
+-0.17394264, -0.17394264, -0.075903416, -0.075903416, 0.22213580, 0.22213580, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, -0.091589697, -0.091589697,
+-0.17394264, -0.17394264, -0.075903416, -0.075903416, 0.22213580, 0.22213580, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, -0.091589697, -0.091589697,
+-0.18962891, -0.18962891, -0.48374656, -0.48374656, -0.39355049, -0.39355049, -0.091589697, -0.091589697, 0.34370443, 0.34370443, 0.28488091, 0.28488091, 0.16331227, 0.16331227, 0.34370443, 0.34370443, 0.15939070, 0.15939070, -0.32296225, -0.32296225, -0.27982500, -0.27982500,
+-0.18962891, -0.18962891, -0.48374656, -0.48374656, -0.39355049, -0.39355049, -0.091589697, -0.091589697, 0.34370443, 0.34370443, 0.28488091, 0.28488091, 0.16331227, 0.16331227, 0.34370443, 0.34370443, 0.15939070, 0.15939070, -0.32296225, -0.32296225, -0.27982500, -0.27982500,
+0.014292659, 0.014292659, -0.49943283, -0.49943283, -0.46806028, -0.46806028, -0.20923676, -0.20923676, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.21429266, 0.21429266, 0.34370443, 0.34370443, -0.12296224, -0.12296224, -0.43276617, -0.43276617, -0.23276617, -0.23276617,
+0.014292659, 0.014292659, -0.49943283, -0.49943283, -0.46806028, -0.46806028, -0.20923676, -0.20923676, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.21429266, 0.21429266, 0.34370443, 0.34370443, -0.12296224, -0.12296224, -0.43276617, -0.43276617, -0.23276617, -0.23276617,
+0.34370443, 0.34370443, -0.45237401, -0.45237401, -0.46413872, -0.46413872, -0.30727598, -0.30727598, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, -0.30335441, -0.30335441, -0.35433480, -0.35433480, 0.32801816, 0.32801816,
+0.34370443, 0.34370443, -0.45237401, -0.45237401, -0.46413872, -0.46413872, -0.30727598, -0.30727598, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, -0.30335441, -0.30335441, -0.35433480, -0.35433480, 0.32801816, 0.32801816,
+0.34370443, 0.34370443, 0.12409658, 0.12409658, -0.41707990, -0.41707990, -0.41707990, -0.41707990, -0.22492303, -0.22492303, -0.18178578, -0.18178578, 0.12017501, 0.12017501, -0.33864853, -0.33864853, -0.37394264, -0.37394264, 0.033900503, 0.033900503, 0.34370443, 0.34370443,
+0.34370443, 0.34370443, 0.12409658, 0.12409658, -0.41707990, -0.41707990, -0.41707990, -0.41707990, -0.22492303, -0.22492303, -0.18178578, -0.18178578, 0.12017501, 0.12017501, -0.33864853, -0.33864853, -0.37394264, -0.37394264, 0.033900503, 0.033900503, 0.34370443, 0.34370443,
+0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.26135150, 0.26135150, -0.28766814, -0.28766814, -0.41707990, -0.41707990, -0.35825637, -0.35825637, -0.068060279, -0.068060279, -0.21315832, -0.21315832, 0.28095934, 0.28095934, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
+0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.26135150, 0.26135150, -0.28766814, -0.28766814, -0.41707990, -0.41707990, -0.35825637, -0.35825637, -0.068060279, -0.068060279, -0.21315832, -0.21315832, 0.28095934, 0.28095934, 0.34370443, 0.34370443, 0.34370443, 0.34370443};
+					
+					
+					
+					
 };
 
 DummyImageProcessingPlugin::DummyImageProcessingPlugin()
 {
 //Insérez votre code ici
+	billeComplex256 =PadBille(DummyImageProcessingPlugin::billeNorm, 256, 256);
+	if(!FFT2D(billeComplex256,256,256,FORWARD) ) //Forward FFT
+		cout << "FFT bille 256 failed" << endl;
+
+	billeComplex512 =PadBille(DummyImageProcessingPlugin::billeNorm, 512, 512);
+	if(!FFT2D(billeComplex512,512,512,FORWARD) ) //Forward FFT 
+		cout << "FFT bille 512 failed" << endl;
 }
 
 DummyImageProcessingPlugin::~DummyImageProcessingPlugin()
 {
-//Insérez votre code ici
+	//Insérez votre code ici
+	delete billeComplex256;
+	delete billeComplex512;
 }
 
 void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_ptrImage, unsigned int in_unWidth, unsigned int in_unHeight,
 		double & out_dXPos, double & out_dYPos)
 {
 //Insérez votre code ici
+
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	out_dXPos = -1.0;
 	out_dYPos = -1.0;
 
 	int seuil = 20;
-	int FORWARD = -1;
-	int REVERSE = 1;
-	int cropW = 480;
-	int cropH = 480;
-	int cropX = 0;
-	int cropY = 0;
+	int cropW;
+	int cropH;
+	int cropX;
+	int cropY;
+	int padW;
+	int padH;
 
-	// Checks to make sure we don't try to crop out of bounds
-	if(cropX+cropW > in_unWidth)
+	complex<float>** plateauComplex;
+
+	// If the previous position of the sphere is not known, we analyze the entire image
+	if(lastPosX == -1 || lastPosY == -1)
 	{
-		cropW -= (cropX + cropW) - in_unWidth;
-	}
-	if(cropY+cropH > in_unHeight)
-	{
-		cropH -= (cropY + cropH) - in_unHeight;
-	}
+		cropW = 480;
+		cropH = 480;
+		cropX = 0;
+		cropY = 0;
+		
 
-	int padW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
-	int padH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
+		// Checks to make sure we don't try to crop out of bounds
+		if(cropX+cropW > in_unWidth)
+		{
+			cropW -= (cropX + cropW) - in_unWidth;
+		}
+		if(cropY+cropH > in_unHeight)
+		{
+			cropH -= (cropY + cropH) - in_unHeight;
+		}
 
-	complex<float>** plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
-	complex<float>** billeComplex = PadBille(DummyImageProcessingPlugin::billeNorm, padH, padW);
+		padW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
+		padH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
+		cout << "PadH: " << padH << " PadW: " << padW << endl; 
+
+		high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
+		plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
 	
-	if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT 
-		cout << "FFT Plateau Failed" << endl;
+	
+		if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT 
+			cout << "FFT Plateau Failed" << endl;
 
-	if(!FFT2D(billeComplex,padW,padH,FORWARD) ) //Forward FFT 
-		cout << "FFT Bille Failed" << endl;
+		// Multiplication Complexe 
+		MultiplicationComplexe(plateauComplex, billeComplex512, padW,padH);
 
-	// Multiplication Complexe 
-	MultiplicationComplexe(plateauComplex, billeComplex, padW,padH);	
+	}
+	// If the previous position of the sphere is known, we analyze a subsection of the image
+	else
+	{
+		cropW = 200;
+		cropH = 200;
+		cropX = lastPosX-(cropW/2);
+		cropY = lastPosY-(cropH/2);
+		// Checks to make sure we don't try to crop out of bounds
+		if(cropX < 0)
+			cropX = 0;
+		if(cropY < 0)
+			cropY = 0;
+		if(cropX+cropW > in_unWidth)
+			cropW -= (cropX + cropW) - in_unWidth;
+		if(cropY+cropH > in_unHeight)
+			cropH -= (cropY + cropH) - in_unHeight;
 
+		padW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
+		padH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
+
+		plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
+	
+	
+		if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT 
+			cout << "FFT Plateau Failed" << endl;
+
+		// Multiplication Complexe 
+		MultiplicationComplexe(plateauComplex, billeComplex256, padW,padH);
+		
+	}
+	
 	if (!FFT2D(plateauComplex, padW,padH,REVERSE) )// Reverse FFT
 		cout << "Correlation  Failed!!!l" << endl;
 
@@ -167,14 +234,22 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	int positionX,positionY;   
     PositionBille(plateauComplex,padW,padH, cropX, cropY, seuil, &positionX,&positionY);
 
+	// Temps
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+    cout << duration/1000.0 << "ms" << endl;;
+
 	cout << "PositionX : " << positionX << endl;
 	cout << "PositionY: " << positionY << endl;
 
+	lastPosX = positionX;
+	lastPosY = positionY;
 	out_dXPos = positionX;
 	out_dYPos = positionY;
 
+	
+
 	delete plateauComplex;
-	delete billeComplex;
 }
 
 void DummyImageProcessingPlugin::OnBallPosition(double in_dXPos, double in_dYPos, double & out_dXDiff, double & out_dYDiff)
@@ -211,14 +286,16 @@ complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_
 	}
 	
 	// Copies a subsection of the image, from int8 to float (0.0-1.0) to a new array
-	for(int height = 0; height < cropHeight; height++)
+	int newHeight = 0;
+	for(int oldHeight = cropY; oldHeight < cropY+cropHeight; oldHeight++)
 	{
 		int newColumn = 0;
-		for(int oldColumn = 0; oldColumn < cropWidth*3; oldColumn += 3)
+		for(int oldColumn = cropX*3; oldColumn < cropX*3+cropWidth*3; oldColumn += 3)
 		{
-			plateauPad[height][newColumn].real((float)(in_ptrImage[oldColumn + inWidth*3*height]) / 255.0);
+			plateauPad[newHeight][newColumn].real((float)(in_ptrImage[oldColumn + inWidth*3*oldHeight]) / 255.0);
 			newColumn++;
 		}
+		newHeight++;
 	}
 	
 	return plateauPad;
@@ -280,7 +357,11 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 	   if (real == NULL || imag == NULL)
 		  return(false);
 	   if (!Powerof2(nx,&m,&twopm) || twopm != nx)
-		  return(false);
+		  return(false);struct CoordBille 
+{
+	int x;
+	int y;
+};
 	   for (j=0;j<ny;j++) {
 		  for (i=0;i<nx;i++) {
 		     real[i] = c[i][j].real();
@@ -471,7 +552,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 				}
 			}
 		}
-		//DEBUG// cout << "v: " << val_max << " x: " << posX_max << "y: " << posY_max << endl;
+		//cout << "v: " << val_max << " x: " << posX_max << "y: " << posY_max << endl;
 	
 		// Si la valeur maximale est plus grande que le seuil, on retourne la position de la bille
 		if(val_max > seuil)
@@ -485,7 +566,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 			*outPosY = -1;
 		}
 	}
-	
+
 	void DummyImageProcessingPlugin::CalculVitesse(unsigned int ordreMax, int* out_VitesseX, int* out_VitesseY)
 	{
 		// Clamp ordre max entre 1 et 6
