@@ -1,3 +1,8 @@
+% Auteur : JFélix Landry, Philippe Girard
+% Date de creation :  8 avril 2017
+% Date d'edition : avril 2017
+% Description du programme : Approximation
+
 clear all
 close all
 clc
@@ -13,6 +18,7 @@ endi = 100;
 y_min_rms = [];
 min_rms = 1000;
 min_rms_index = starti;
+max_cor = 0;
 params = [0 0];
 coeffs = [];
 for i = starti:1:endi
@@ -31,13 +37,15 @@ for i = starti:1:endi
         G = G + R(j)*pxi(:,j);
     end
 
-    % calculate rms
+    % calculate rms & cor
     current_rms =  rms(voltage-G);
+    cor = corr(voltage,G);
     
     % set smallest rms curve
     if (current_rms < min_rms)
         y_min_rms = G;
         min_rms = current_rms;
+        max_cor = cor;
         min_rms_index = i;
         params = [A B];
         coeffs = R;
@@ -46,7 +54,7 @@ for i = starti:1:endi
     % display error
 %     disp(['i = ', num2str(i), ' rms = ', num2str(current_rms)])
 end
-disp(['minimal rms = ', num2str(min_rms), ' at i = ', num2str(min_rms_index)])
+disp(['minimal rms = ', num2str(min_rms), ', max cor = ', num2str(max_cor), ' at i = ', num2str(min_rms_index)])
 disp([num2str(coeffs(3)), 'exp(', num2str(params(2)), '*x)+'...
     num2str(coeffs(2)), 'exp(', num2str(params(1)), '*x)+'...
     num2str(coeffs(1))])
