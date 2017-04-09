@@ -4,9 +4,9 @@ close all
 clc
 
 T = 1/30; % Periode echantillonage
-V = 2; % vitesse constante
+V = 0.25; % vitesse constante
 
-aller = [1, 2, 3, 4, 5, 6;4.5, 2.6, 4.5, 2.8, 3.2, 4.6]; % X, Y
+aller = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0;1.5, 2.2, 2.8, 3.5, 2.5, 2.0, 3.0]; % X, Y
 retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
 
 
@@ -57,16 +57,16 @@ retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
 %% Affichage
 figure 
 hold on
-plot(aller(2,:), 'o')
-plot(retour(2,:), 'o')
+plot(aller(1,:).*10, aller(2,:).*10, 'o')
+% plot(retour(2,:), 'o')
 
 % plot(retour(2,:), 'o')
-plot(aller_int(1,:),aller_int(2,:));
-plot(points(1,:),points(2,:), 'x');
-plot(retour_int(1,:),retour_int(2,:));
-plot(points2(1,:),points2(2,:), 'x');
+plot(aller_int(1,:).*10,aller_int(2,:).*10);
+plot(points(1,:).*10,points(2,:).*10, 'x');
+% plot(retour_int(1,:),retour_int(2,:));
+% plot(points2(1,:),points2(2,:), 'x');
 
 %% Write
 % csvwrite('retour.csv', fliplr(retour_int)')
-% csvwrite('aller.csv', aller_int')
+csvwrite('aller.csv', points')
 

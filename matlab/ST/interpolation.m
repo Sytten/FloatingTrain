@@ -3,7 +3,7 @@ function [M, O] = interpolation(N, V, T)
 pas = 101; % Pas integration
 
 [coeff] = polyfit(N(1,:),N(2,:),length(N)-1);
-dx = (length(N)-1)/pas;
+dx = (N(1,end)-N(1,1))/pas;
 x = N(1,1):dx:N(1,end);
 M = [x; polyval(coeff, x)];
 
@@ -37,6 +37,6 @@ for i = 1:O_taille
     O = [O, xi];
 end
 
-O = [O; polyval(coeff, O)];
+O = [O; polyval(coeff, O); polyval(coeff_d, O)];
 
 end
