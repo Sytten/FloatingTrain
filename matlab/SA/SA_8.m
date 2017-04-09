@@ -1,7 +1,8 @@
-% Auteur : Pierre-Charles Gendron et Hugo Therrien
+% Auteur : Pierre-Charles Gendron, Hugo Therrien et Antoille Mailhot
 % Date de création : 2017-04-02
-% Date d'édition : 2017-04-02
-% Description du programme : Asservissement
+% Date d'édition : 2017-04-09
+% Description du programme : Asservissement des angles de la plaque
+
 clc
 close all
 clear all
