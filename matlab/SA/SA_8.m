@@ -1,8 +1,7 @@
-% Auteur : Pierre-Charles Gendron, Hugo Therrien et Antoille Mailhot
+% Auteur : Pierre-Charles Gendron et Hugo Therrien
 % Date de création : 2017-04-02
-% Date d'édition : 2017-04-09
-% Description du programme : Asservissement des angles de la plaque
-
+% Date d'édition : 2017-04-02
+% Description du programme : Asservissement
 clc
 close all
 clear all
@@ -20,7 +19,6 @@ distance_zero_pdes = 8;
 nb_AvPh = 2;
 phase_extra = 12;
 
-
 flag_figures = 0; %0: Pas de figure. 1: Figures.
 
 %% %% Génération des ft de phi
@@ -32,6 +30,9 @@ tp = 0.025;
 [num_phi, den_phi] = ss2tf(A_phi,B_phi,C_phi,D_phi_1sortie);
 ft_phi = tf(num_phi,den_phi);
 ftbf_phi = feedback(ft_phi,1);
+
+[num_theta, den_theta] = ss2tf(A_theta,B_theta,C_theta,D_theta_1sortie);
+ft_theta = tf(num_theta,den_theta);
 
 %% Conception de l'asservissement
 phi_des = atand(-pi/(log(Mp/100)));
@@ -100,9 +101,9 @@ if flag_figures==1
 figure
 hold
 plot([pdes conj(pdes)],'p');
-rlocus(ft_phi*ft_AvPh,1,'s');
+rlocus(ft_phi*ft_PI*ft_AvPh,1,'s');
 K = logspace(-3,2,10000);
-rlocus(ft_phi*ft_AvPh,K);
+rlocus(ft_phi*ft_PI*ft_AvPh,K);
 axis([-1000 150 -250 250])
 end
 
