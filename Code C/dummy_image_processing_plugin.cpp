@@ -62,18 +62,18 @@ private:
 
 
 	// Cree la nouvelle image du plateau, normalisée entre 0 et 1, paddé aux dimensions requises
-	float* PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight);
+	complex<float>** PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight);
 
 // Padding de la bille normalisée
-	float* PadBille(const float* billeNorm, unsigned int outHeight, unsigned int outWidth);
+	complex<float>** PadBille(const float* billeNorm, unsigned int outHeight, unsigned int outWidth);
 	// Higher power of two
 	int NextPowerOfTwo(int num);
 	int FFT2D(complex<float> **c,int nx,int ny,int dir);
 	int FFT(int dir,int m,float *x,float *y);
 	// Lower power of two
 	int Powerof2(int n,int *m,int *twopm);
-    void correlation(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY);
-	void PositionBille(complex<float>** correlation, int tailleX, int tailleY, float seuil, int* outPosX, int* outPosY);
+    void MultiplicationComplexe(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY);
+	void PositionBille(complex<float>** MultiplicationComplexe, int tailleX, int tailleY, float seuil, int* outPosX, int* outPosY);
 
 	const float billeNorm[SIZE_BILLE*SIZE_BILLE] = { 	0.34370440, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
@@ -129,81 +129,36 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	int padW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
 	int padH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
 
-	float* platNormPad = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
-	float* billeNormPad = PadBille(DummyImageProcessingPlugin::billeNorm, padH, padW);
+	complex<float>** plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
+	complex<float>** billeComplex = PadBille(DummyImageProcessingPlugin::billeNorm, padH, padW);
 	
-	complex<float>** PlateauComplex = new complex<float>* [padH];  	// Creer une matrice de complex pour le plateau
-	complex<float>** BilleComplex = new complex<float>* [padH];    // Creer une matrice de complex pour la bille
-
-	// Each real of complex matrix is set to a pixel value and imag = 0
-	for(int height = 0; height < padH; height++)
-	{
-	    PlateauComplex[height] = new complex<float>[padW];		
-		BilleComplex[height] = new complex<float>[padW];		
-		for(int width = 0; width < padW; width++)
-		{
-			PlateauComplex[height][width].real(platNormPad[width+height*padH]);
-			PlateauComplex[height][width].imag(0.0);		  
-			BilleComplex[height][width].real(billeNormPad[width+height*padH]);
-			BilleComplex[height][width].imag(0.0);	
-		}
-	}
-
-	cout << "billeComplexe: " << BilleComplex[0][0].real() << endl;
-	cout << "billeComplexe: " << BilleComplex[0][1].real() << endl;
-	cout << "billeComplexe: " << BilleComplex[0][2].real() << endl;
-	cout << "billeComplexe: " << BilleComplex[0][3].real() << endl;
-	cout << "billeComplexe: " << BilleComplex[0][13].real() << endl;
-
-	if( FFT2D(PlateauComplex,padW,padH,-1) ) //Forward FFT 
-   {
+	if( FFT2D(plateauComplex,padW,padH,-1) ) //Forward FFT 
 		cout << "FFT Plateau sucessful" << endl;
-		cout<<PlateauComplex[0][0].real()  << " " << PlateauComplex[0][0].imag() << "j" << endl;
-		cout<< PlateauComplex[0][1].real()  << " " << PlateauComplex[0][1].imag() << "j" << endl;
-		cout<< PlateauComplex[0][2].real()  << " " << PlateauComplex[0][2].imag() << "j" << endl;
-   }
 	else
-	{
 		cout << "FFT Failed" << endl;
-	}
 
-	if( FFT2D(BilleComplex,padW,padH,-1) ) //Forward FFT 
-   {
+	if( FFT2D(billeComplex,padW,padH,-1) ) //Forward FFT 
 		cout << "FFT Bille sucessful" << endl;
-		cout<<BilleComplex[0][0].real()  << " " << BilleComplex[0][0].imag() << "j" << endl;
-		cout<< BilleComplex[0][1].real()  << " " << BilleComplex[0][1].imag() << "j" << endl;
-		cout<< BilleComplex[0][2].real()  << " " << BilleComplex[0][2].imag() << "j" << endl;
-   }
 	else
-	{
 		cout << "FFT Failed" << endl;
-	}
-	// correlation 
-	correlation(PlateauComplex, BilleComplex, padW,padH);	
 
-	cout << "Correlation" << endl;
-	cout<<PlateauComplex[0][0].real()  << " " << PlateauComplex[0][0].imag() << "j" << endl;
-	cout<< PlateauComplex[0][1].real()  << " " << PlateauComplex[0][1].imag() << "j" << endl;
-	cout<< PlateauComplex[0][2].real()  << " " << PlateauComplex[0][2].imag() << "j" << endl;
+	// Multiplication Complexe 
+	MultiplicationComplexe(plateauComplex, billeComplex, padW,padH);	
 
-	if ( FFT2D(PlateauComplex, padW,padH,1) )// Reverse FFT
-	{
+	if ( FFT2D(plateauComplex, padW,padH,1) )// Reverse FFT
 		cout << "Correlation succesful" << endl;
-	}
 	else
-	{
 		cout << "Correlation Failed!!!" << endl;		
-	}
 
    // Seuil
 	int PositionX,PositionY;   
-    PositionBille(PlateauComplex,padW,padH, 25, &PositionX,&PositionY);
+    PositionBille(plateauComplex,padW,padH, 25, &PositionX,&PositionY);
 
 	cout << "PositionX : " << PositionX << endl;
 	cout << "PositionY: " << PositionY << endl;
 
-	delete platNormPad;
-	delete billeNormPad;
+	delete plateauComplex;
+	delete billeComplex;
 }
 
 void DummyImageProcessingPlugin::OnBallPosition(double in_dXPos, double in_dYPos, double & out_dXDiff, double & out_dYDiff)
@@ -214,9 +169,10 @@ void DummyImageProcessingPlugin::OnBallPosition(double in_dXPos, double in_dYPos
 
 }
 
-float* DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight)
+complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight)
 {
-	float* plateauPad = new float[outWidth*outHeight]();
+	complex<float>** plateauPad = new complex<float>* [outHeight]();
+	//float* plateauPad = new float[outWidth*outHeight]();
 	
 	// Checks to make sure we don't try to crop out of bounds
 	if(cropX+cropWidth > inWidth)
@@ -227,6 +183,11 @@ float* DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_array<uint
 	{
 		cropHeight -= (cropY + cropHeight) - inHeight;
 	}
+
+	for(int height = 0; height < outHeight; height++)
+	{
+		plateauPad[height] = new complex<float>[outWidth]();
+	}
 	
 	// Copies a subsection of the image, from int8 to float (0.0-1.0) to a new array
 	for(int height = 0; height < cropHeight; height++)
@@ -234,26 +195,35 @@ float* DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_array<uint
 		int newColumn = 0;
 		for(int oldColumn = 0; oldColumn < cropWidth*3; oldColumn += 3)
 		{
-			plateauPad[newColumn + outWidth*height] = (float)(in_ptrImage[oldColumn + inWidth*3*height]) / 255.0;
+			plateauPad[height][newColumn].real((float)(in_ptrImage[oldColumn + inWidth*3*height]) / 255.0);
 			newColumn++;
 		}
 	}
+
+	cout << "Padding end" << endl;
 	
 	return plateauPad;
 }
 
 
 // Padding de la bille normalisée
-float* DummyImageProcessingPlugin::PadBille(const float* billeNorm, unsigned int outHeight, unsigned int outWidth)
+complex<float>** DummyImageProcessingPlugin::PadBille(const float* billeNorm, unsigned int outHeight, unsigned int outWidth)
 {
-	float* billeNormPad = new float[outHeight*outWidth]();
+	//float* billeNormPad = new float[outHeight*outWidth]();
+	complex<float>** billeNormPad = new complex<float>* [outHeight](); 
 	
+
+	for(int height = 0; height < outHeight; height++)
+	{
+		billeNormPad[height] = new complex<float>[outWidth]();
+	}	
 	
 	for(int height = 0; height < SIZE_BILLE; height++)
 	{
 		for(int width = 0; width < SIZE_BILLE; width++)
 		{
-			billeNormPad[width + outWidth*height] = billeNorm[width + SIZE_BILLE*height];
+			//billeNormPad[width + outWidth*height] = billeNorm[width + SIZE_BILLE*height];
+			billeNormPad[height][width].real(billeNorm[width + SIZE_BILLE*height]);
 		}
 	}
 	
@@ -453,7 +423,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 	}
 
 	// Executes pixel by pixel multiplication places result in fft1
-	void DummyImageProcessingPlugin::correlation(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY)
+	void DummyImageProcessingPlugin::MultiplicationComplexe(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY)
 	{
 		for (int i = 0; i < sizeX; i++)
 		{
@@ -465,7 +435,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 	}
 	
 	// Retourne la position de la bille dans le tableau de la corrélation
-	void DummyImageProcessingPlugin::PositionBille(complex<float>** correlation, int tailleX, int tailleY, float seuil, int* outPosX, int* outPosY)
+	void DummyImageProcessingPlugin::PositionBille(complex<float>** MultiplicationComplexe, int tailleX, int tailleY, float seuil, int* outPosX, int* outPosY)
 	{
 		int posX_max = -1;
 		int posY_max = -1;
@@ -476,9 +446,9 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		{
 			for(int width = 0; width < tailleX; width++)
 			{
-				if(correlation[height][width].real() > val_max)
+				if(MultiplicationComplexe[height][width].real() > val_max)
 				{
-					val_max = abs(correlation[height][width]);
+					val_max = abs(MultiplicationComplexe[height][width]);
 					posX_max = width - (SIZE_BILLE/2);
 					posY_max = height - (SIZE_BILLE/2);
 				}
