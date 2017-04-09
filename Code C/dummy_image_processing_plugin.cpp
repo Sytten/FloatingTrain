@@ -73,7 +73,7 @@ private:
 	// Lower power of two
 	int Powerof2(int n,int *m,int *twopm);
     void MultiplicationComplexe(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY);
-	void PositionBille(complex<float>** MultiplicationComplexe, int tailleX, int tailleY, int pointXCrop, int pointYCrop, float seuil, int* outPosX, int* outPosY);
+	void PositionBille(complex<float>** correlation, int tailleX, int tailleY, int pointXCrop, int pointYCrop, float seuil, int* outPosX, int* outPosY);
 
 	const float billeNorm[SIZE_BILLE*SIZE_BILLE] = { 	0.34370440, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
@@ -105,13 +105,11 @@ private:
 
 DummyImageProcessingPlugin::DummyImageProcessingPlugin()
 {
-	cout << "Hello World!" << endl;
 //Insérez votre code ici
 }
 
 DummyImageProcessingPlugin::~DummyImageProcessingPlugin()
 {
-	cout << "Goodbye Cruel World!" << endl;
 //Insérez votre code ici
 }
 
@@ -122,6 +120,9 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	out_dXPos = -1.0;
 	out_dYPos = -1.0;
 
+	int seuil = 25;
+	int FORWARD = -1;
+	int REVERSE = 1;
 	int cropW = 480;
 	int cropH = 480;
 	int cropX = 0;
@@ -132,30 +133,28 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	complex<float>** plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
 	complex<float>** billeComplex = PadBille(DummyImageProcessingPlugin::billeNorm, padH, padW);
 	
-	if( FFT2D(plateauComplex,padW,padH,-1) ) //Forward FFT 
-		cout << "FFT Plateau sucessful" << endl;
-	else
-		cout << "FFT Failed" << endl;
+	if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT 
+		cout << "FFT Plateau Failed" << endl;
 
-	if( FFT2D(billeComplex,padW,padH,-1) ) //Forward FFT 
-		cout << "FFT Bille sucessful" << endl;
-	else
-		cout << "FFT Failed" << endl;
+	if(!FFT2D(billeComplex,padW,padH,FORWARD) ) //Forward FFT 
+		cout << "FFT Bille Failed" << endl;
 
 	// Multiplication Complexe 
 	MultiplicationComplexe(plateauComplex, billeComplex, padW,padH);	
 
-	if ( FFT2D(plateauComplex, padW,padH,1) )// Reverse FFT
-		cout << "Correlation succesful" << endl;
-	else
-		cout << "Correlation Failed!!!" << endl;		
+	if (!FFT2D(plateauComplex, padW,padH,REVERSE) )// Reverse FFT
+		cout << "Correlation  Failed!!!l" << endl;
+
 
    // Seuil
-	int PositionX,PositionY;   
-    PositionBille(plateauComplex,padW,padH, cropX, cropY, 25, &PositionX,&PositionY);
+	int positionX,positionY;   
+    PositionBille(plateauComplex,padW,padH, cropX, cropY, seuil, &positionX,&positionY);
 
-	cout << "PositionX : " << PositionX << endl;
-	cout << "PositionY: " << PositionY << endl;
+	cout << "PositionX : " << positionX << endl;
+	cout << "PositionY: " << positionY << endl;
+
+	out_dXPos = positionX;
+	out_dYPos = positionY;
 
 	delete plateauComplex;
 	delete billeComplex;
@@ -199,8 +198,6 @@ complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_
 			newColumn++;
 		}
 	}
-
-	cout << "Padding end" << endl;
 	
 	return plateauPad;
 }
@@ -435,7 +432,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 	}
 	
 	// Retourne la position de la bille dans le tableau de la corrélation
-	void DummyImageProcessingPlugin::PositionBille(complex<float>** MultiplicationComplexe, int tailleX, int tailleY, int pointXCrop, int pointYCrop, float seuil, int* outPosX, int* outPosY)
+	void DummyImageProcessingPlugin::PositionBille(complex<float>** correlation, int tailleX, int tailleY, int pointXCrop, int pointYCrop, float seuil, int* outPosX, int* outPosY)
 	{
 		int posX_max = -1;
 		int posY_max = -1;
@@ -446,15 +443,14 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		{
 			for(int width = 0; width < tailleX; width++)
 			{
-				if(MultiplicationComplexe[height][width].real() > val_max)
+				if(correlation[height][width].real() > val_max)
 				{
-					val_max = abs(MultiplicationComplexe[height][width]);
-					posX_max = width - (SIZE_BILLE/2) + cropX;
-					posY_max = height - (SIZE_BILLE/2) + cropY;
+					val_max = abs(correlation[height][width]);
+					posX_max = width - (SIZE_BILLE/2) + pointXCrop;
+					posY_max = height - (SIZE_BILLE/2) + pointYCrop;
 				}
 			}
 		}
-		cout << "Valeur max: " << val_max << " PosX: " << posX_max << " PosY: " << posY_max << endl;
 	
 		// Si la valeur maximale est plus grande que le seuil, on retourne la position de la bille
 		if(val_max > seuil)
