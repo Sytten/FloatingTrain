@@ -24,14 +24,10 @@ coeffs = [];
 for i = starti:1:endi
     A = 1*i;
     B = pi/(4*i);
-    C = pi/(2*i);
-    D = pi/(6*i);
     
     pxi = [ ones(1,length(x))',...
             sin(A*x),...
-            sin(B*x),...
-            sin(C*x),...
-            sin(D*x)
+            cos(B*x)
             ];
     
     R = pinv(pxi)*y;
@@ -51,7 +47,7 @@ for i = starti:1:endi
         max_cor = cor;
         min_rms = current_rms;
         min_rms_index = i;
-        params = [A B C D];
+        params = [A B];
         coeffs = R;
     end
     
@@ -62,7 +58,7 @@ disp(['minimal rms = ', num2str(min_rms), ', max cor = ', num2str(max_cor), ' at
 
 x = [-0.02:0.0001:0.04];
 
-y_test= coeffs(5)*sin(params(4)*x)+coeffs(4)*sin(params(3)*x)+coeffs(3)*sin(params(2)*x)+coeffs(2)*sin(params(1)*x)+coeffs(1);
+y_test= coeffs(3)*cos(params(2)*x)+coeffs(2)*sin(params(1)*x)+coeffs(1);
 
 figure 
 plot(distance,voltage,'o')
