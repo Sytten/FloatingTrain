@@ -48,8 +48,16 @@ for i = starti:1:endi
 end
 disp(['minimal rms = ', num2str(min_rms), ' at i = ', num2str(min_rms_index)])
 
+x = [-0.02:0.0001:0.04];
+
+y_test= coeffs(3)*sin(params(2)*(x+1))+coeffs(2)*log(params(1)*(x+1))+coeffs(1);
 
 figure 
-plot(distance,y_min_rms)
+plot(distance,voltage,'o')
 hold on
-plot(distance,voltage)
+plot(x, y_test)
+axis([-0.02 0.04 -0.5 2.5])
+figure
+plot(distance,voltage,'o')
+hold on
+plot(distance, y_min_rms)
