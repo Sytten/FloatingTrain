@@ -56,8 +56,11 @@ x = [-0.02:0.0001:0.04];
 y_test= coeffs(3)*exp(params(2)*x)+coeffs(2)*exp(params(1)*x)+coeffs(1);
 
 figure 
-plot(distance,y_min_rms)
-hold on
 plot(distance,voltage,'o')
+hold on
 plot(x, y_test)
 axis([-0.02 0.04 -0.5 2.5])
+figure
+plot(distance,voltage,'o')
+hold on
+plot(distance, y_min_rms)
