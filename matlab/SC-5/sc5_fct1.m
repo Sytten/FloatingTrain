@@ -17,11 +17,11 @@ params = [0 0];
 coeffs = [];
 for i = starti:1:endi
     A = 1*i;
-    B = 4*i;
+    B = pi/(4*i);
     
     pxi = [ ones(1,length(x))',...
-            exp(A*x),...
-            exp(B*x)
+            sin(A*x),...
+            cos(B*x)
             ];
     
     R = pinv(pxi)*y;
@@ -47,20 +47,23 @@ for i = starti:1:endi
 %     disp(['i = ', num2str(i), ' rms = ', num2str(current_rms)])
 end
 disp(['minimal rms = ', num2str(min_rms), ' at i = ', num2str(min_rms_index)])
-disp([num2str(coeffs(3)), 'exp(', num2str(params(2)), '*x)+'...
-    num2str(coeffs(2)), 'exp(', num2str(params(1)), '*x)+'...
-    num2str(coeffs(1))])
 
 x = [-0.02:0.0001:0.04];
 
-y_test= coeffs(3)*exp(params(2)*x)+coeffs(2)*exp(params(1)*x)+coeffs(1);
+y_test= coeffs(3)*cos(params(2)*x)+coeffs(2)*sin(params(1)*x)+coeffs(1);
 
 figure 
 plot(distance,voltage,'o')
 hold on
 plot(x, y_test)
 axis([-0.02 0.04 -0.5 2.5])
+title('Comparaison modèle sinusoïdale - Overfitting')
+ylabel('Voltage (V)')
+xlabel('Distance (m)')
 figure
-plot(distance,voltage,'o')
+plot(distance,voltage,'+','LineWidth',1)
 hold on
-plot(distance, y_min_rms)
+plot(distance, y_min_rms,'-r','LineWidth',2)
+title('Comparaison modèle sinusoïdale')
+ylabel('Voltage (V)')
+xlabel('Distance (m)')
