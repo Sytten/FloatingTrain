@@ -51,7 +51,13 @@ disp([num2str(coeffs(3)), 'exp(', num2str(params(2)), '*x)+'...
     num2str(coeffs(2)), 'exp(', num2str(params(1)), '*x)+'...
     num2str(coeffs(1))])
 
+x = [-0.02:0.0001:0.04];
+
+y_test= coeffs(3)*exp(params(2)*x)+coeffs(2)*exp(params(1)*x)+coeffs(1);
+
 figure 
 plot(distance,y_min_rms)
 hold on
-plot(distance,voltage)
+plot(distance,voltage,'o')
+plot(x, y_test)
+axis([-0.02 0.04 -0.5 2.5])
