@@ -3,12 +3,17 @@
  *
  *  Created on: Jun 08, 2016
  *      Author: chaj1907, micj1901
+ *						carj2124, mcgj2701
  */
 
+
+#define DEBUG
 #include <cstdint>
 #include <iostream>
 #include <complex>
 #include <chrono>
+#include <stdlib.h>
+#include <time.h>
 #include "image_processing_plugin.h"
 using namespace std;
 using namespace std::chrono; 
@@ -47,11 +52,18 @@ public:
 	virtual void OnBallPosition(double in_dXPos, double in_dYPos, double & out_dXDiff, double & out_dYDiff);
 
 private:
-	//Constante
+	// Constantes
 	#define SIZE_BILLE 22
 	#define FORWARD -1
 	#define REVERSE 1
 	#define ORDRE_DIFF 6
+	#define SPHERE_LOOKUP_BOTTOM_LEFT 0
+	#define SPHERE_LOOKUP_TOP_LEFT 1
+	#define SPHERE_LOOKUP_TOP_RIGHT 2
+	#define SPHERE_LOOKUP_BOTTOM_RIGHT 3
+	#define LOOKUP_OVERLAP 35
+	
+	#define SPHERE_LOOKUP_RANDOM 4
 
 	struct CoordBille 
 	{
@@ -62,9 +74,9 @@ private:
 	//Membres privee
 	int lastPosX = -1;
 	int lastPosY = -1;
+	int sphereNotFoundCounter = 0;
 	vector<CoordBille> PositionsBilles_Prec; //Vecteur ordonnée de la position la plus ancienne jusqua la plus récente (max 7 position enregistré)
-	complex<float>** billeComplex256;
-	complex<float>** billeComplex512;
+	complex<float>** billeComplex;
 	
 	//Methode privee
 	// Cree la nouvelle image du plateau, normalisée entre 0 et 1, paddé aux dimensions requises
@@ -110,25 +122,25 @@ private:
 DummyImageProcessingPlugin::DummyImageProcessingPlugin()
 {
 	//Construire image de la bille avec padding jusqua la 256 et 512
-	billeComplex256 =PadBille(DummyImageProcessingPlugin::billeNorm, 256, 256);
-	if(!FFT2D(billeComplex256,256,256,FORWARD) ) //Forward FFT
+	billeComplex =PadBille(DummyImageProcessingPlugin::billeNorm, 256, 256);
+	if(!FFT2D(billeComplex,256,256,FORWARD) ) //Forward FFT
 		cout << "FFT bille 256 failed" << endl;
 
-	billeComplex512 =PadBille(DummyImageProcessingPlugin::billeNorm, 512, 512);
-	if(!FFT2D(billeComplex512,512,512,FORWARD) ) //Forward FFT 
-		cout << "FFT bille 512 failed" << endl;
+	srand (time(NULL));
 }
 
 DummyImageProcessingPlugin::~DummyImageProcessingPlugin()
 {
-	delete billeComplex256;
-	delete billeComplex512;
+	delete billeComplex;
 }
 
 void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_ptrImage, unsigned int in_unWidth, unsigned int in_unHeight,
 		double & out_dXPos, double & out_dYPos)
 {
-	//Debug // high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	#ifdef DEBUG
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	#endif // DEBUG
+
 	out_dXPos = -1.0;
 	out_dYPos = -1.0;
 
@@ -142,14 +154,50 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 
 	complex<float>** plateauComplex;
 
-	// If the previous position of the sphere is not known, we analyze the entire image
+	// If the previous position of the sphere is not known, we analyze an incomplete quadrant of the image
 	if(lastPosX == -1 || lastPosY == -1)
 	{
-		cropW = 480;
-		cropH = 480;
-		cropX = 0;
-		cropY = 0;
-		
+		cropW = 256-SIZE_BILLE-1;
+		cropH = 256-SIZE_BILLE-1;
+
+		// Selects which quadrant of the image to analyze (or a random position)
+		switch (sphereNotFoundCounter){
+			case SPHERE_LOOKUP_BOTTOM_LEFT:
+				cropX = (in_unWidth/2)-cropW+LOOKUP_OVERLAP;
+				if(cropX < 0)
+					cropX = 0;
+				cropY = (in_unHeight/2)-LOOKUP_OVERLAP;
+				break;
+
+			case SPHERE_LOOKUP_TOP_LEFT:
+				cropX = (in_unWidth/2)-cropW+LOOKUP_OVERLAP;
+				if(cropX < 0)
+					cropX = 0;
+				cropY = (in_unHeight/2)-cropH+LOOKUP_OVERLAP;
+				if(cropY < 0)
+					cropY  = 0;
+				break;
+
+			case SPHERE_LOOKUP_TOP_RIGHT:
+				cropX = (in_unWidth/2)-LOOKUP_OVERLAP;
+				cropY = (in_unHeight/2)-cropH+LOOKUP_OVERLAP;
+				if(cropY < 0)
+					cropY  = 0;
+				break;
+
+			case SPHERE_LOOKUP_BOTTOM_RIGHT:
+				cropX = (in_unWidth/2)-LOOKUP_OVERLAP;
+				cropY = (in_unHeight/2)-LOOKUP_OVERLAP;
+				break;
+	
+			default:	// Random lookup
+				cropX = rand() % (in_unWidth - cropW);
+				cropY = rand() % (in_unHeight - cropH);
+				sphereNotFoundCounter = SPHERE_LOOKUP_RANDOM;
+				
+				break;
+
+		}
 
 		// Checks to make sure we don't try to crop out of bounds
 		if(cropX+cropW > in_unWidth)
@@ -161,9 +209,8 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 			cropH -= (cropY + cropH) - in_unHeight;
 		}
 
-		padW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
-		padH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
-		cout << "PadH: " << padH << " PadW: " << padW << endl; 
+		padW = 256;
+		padH = 256;
 
 		high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -174,14 +221,15 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 			cout << "FFT Plateau Failed" << endl;
 
 		// Multiplication Complexe 
-		MultiplicationComplexe(plateauComplex, billeComplex512, padW,padH);
+		MultiplicationComplexe(plateauComplex, billeComplex, padW,padH);
 
 	}
 	// If the previous position of the sphere is known, we analyze a subsection of the image
 	else
 	{
-		cropW = 200;
-		cropH = 200;
+		sphereNotFoundCounter = -1;
+		cropW = 256-SIZE_BILLE-1;
+		cropH = 256-SIZE_BILLE-1;
 		cropX = lastPosX-(cropW/2);
 		cropY = lastPosY-(cropH/2);
 		// Checks to make sure we don't try to crop out of bounds
@@ -194,8 +242,8 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 		if(cropY+cropH > in_unHeight)
 			cropH -= (cropY + cropH) - in_unHeight;
 
-		padW = NextPowerOfTwo(cropW+SIZE_BILLE-1);
-		padH = NextPowerOfTwo(cropH+SIZE_BILLE-1);
+		padW = 256;
+		padH = 256;
 
 		plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
 	
@@ -203,7 +251,7 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 			cout << "FFT Plateau Failed" << endl;
 
 		// Multiplication Complexe 
-		MultiplicationComplexe(plateauComplex, billeComplex256, padW,padH);
+		MultiplicationComplexe(plateauComplex, billeComplex, padW,padH);
 	}
 	
 	if (!FFT2D(plateauComplex, padW,padH,REVERSE) )// Reverse FFT
@@ -215,11 +263,12 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
     PositionBille(plateauComplex,padW,padH, cropX, cropY, seuil, &positionX,&positionY);
 
 	// Temps
-	/* DEBUG
+	#ifdef DEBUG
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( t2 - t1 ).count();
-    cout << duration/1000.0 << "ms" << endl;;
-	*/
+    cout << "Recherche: " << duration/1000.0 << "ms" << endl;;
+	#endif // DEBUG
+	
 	
 	cout << "PositionX : " << positionX << endl;
 	cout << "PositionY: " << positionY << endl;
@@ -228,6 +277,9 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	lastPosY = positionY;
 	out_dXPos = positionX;
 	out_dYPos = positionY;
+
+	if(lastPosX == -1 || lastPosY == -1)
+		sphereNotFoundCounter++;
                                                                                
 	delete plateauComplex;
 }
@@ -385,7 +437,6 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 	   x and y are the real and imaginary arrays of 2^m points.
 	   dir =  1 gives forward transform
 	   dir = -1 gives reverse transform
-
 		 Formula: forward
 		              N-1
 		              ---
@@ -394,7 +445,6 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		          N   /                                n=0..N-1
 		              ---
 		              k=0
-
 		  Formula: reverse
 		              N-1
 		              ---
