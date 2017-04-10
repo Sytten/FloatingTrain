@@ -1,12 +1,7 @@
 % Auteur : Pierre-Charles Gendron
 % Date de création : 2017-04-08
-% Date d'édition : 2017-04-08
+% Date d'édition : 2017-04-10
 % Description du programme : Asservissement de la position y et vitesse 
-
-clearvars; close all; clc;
-
-%% Génération des ft z de la plaque
-run('SM_4.m')
 
 % Légende 
 % FT_XX -> fonction de transfert position X / angle theta
@@ -27,6 +22,8 @@ disp('Analyse préliminaire')
 disp('FT position y / angle phi')
 FT_YY = tf(num_Sy(1,:),den_Sy)
 
+if flag_figures==1
+    
 figure
 rlocus(FT_YY)
 axis([-3 1.5 -1 1])
@@ -59,6 +56,7 @@ print('reponse_impulsionnelle_non_compense_FT_XX','-dpng','-r450')
 
 disp('Marginalement stable, une compensation est nécessaire')
 
+end;
 %% compensation PD pour amléliorer le regime transitoire
 
 delta_phi = 180 - angle(polyval(num_Sy(1,:),p_des)/polyval(den_Sy,p_des))*180/pi;
@@ -83,45 +81,3 @@ den_a_XX = [0 1];
 
 Kv_XX = 1/abs(polyval(conv(num_a_XX,num_Sx(1,:)),p_des)/polyval(conv(den_a_XX,den_Sx),p_des));
 Kp_XX = -z*Kv_XX;
-
-% phase = angle(polyval(num_Sy(1,:),p_des)/polyval(den_Sy,p_des))*180/pi-360;
-% 
-% delta_phi = -180 - phase;
-% %delta_phi =delta_phi/2;                %double AvPh 
-% alpha = 180 - phi_des;
-% phi_z = (alpha + delta_phi)/2;
-% phi_p = (alpha - delta_phi)/2;
-% z = real(p_des) - imag(p_des)/tand(phi_z);
-% p = real(p_des) - imag(p_des)/tand(phi_p);
-% 
-% num_a_YY = [1 -z];      
-% den_a_YY = [1 -p];
-% 
-% % num_a = conv([1 -z],[1 -z]);      %double avance phase
-% % den_a = conv([1 -p],[1 -p]);
-% FTa_YY = tf(num_a_YY,den_a_YY);
-% 
-% Ka = 1/abs(polyval(conv(num_a_YY,num_Sy(1,:)),p_des)/polyval(conv(den_a_YY,den_Sy),p_des));
-% 
-% FTa_YY = Ka*FTa_YY;
-% pole = rlocus(FTa_YY*FT_YY,1);
-% figure % verification qu'on rencontre les parametres
-% rlocus(FTa_YY*FT_YY)
-% title('Lieu des racines pour position Y')
-% hold on
-% plot(real(p_des),imag(p_des),'p')
-% plot(real(pole),imag(pole),'s')
-% 
-% FTBF_YY = feedback(FTa_YY*FT_YY,1);
-% figure % reponse a echelon
-% step(FTBF_YY)
-% title('Reponse a l''echelon')
-% 
-
-
-
-
-
-
-
-

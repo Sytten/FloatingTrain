@@ -1,15 +1,7 @@
 % Auteur : Pierre-Charles Gendron et Hugo Therrien
 % Date de création : 2017-04-02
-% Date d'édition : 2017-04-0
+% Date d'édition : 2017-04-10
 % Description du programme : Asservissement de la position x et vitesse x
-
-clc
-close all
-clear all
-
-
-%% Génération des ft z de la plaque
-run('SM_4.m')
 
 % Légende 
 % FT_XX -> fonction de transfert position X / angle theta
@@ -29,6 +21,9 @@ disp('Analyse préliminaire')
 disp('FT position X / angle theta')
 FT_XX = tf(num_Sx(1,:),den_Sx)
 
+
+if flag_figures==1
+    
 figure
 rlocus(FT_XX)
 axis([-3 1.5 -1 1])
@@ -60,6 +55,7 @@ axis([0 0.5 -0.5 0.2])
 print('reponse_impulsionnelle_non_compense_FT_XX','-dpng','-r450')
 disp('Diverge, une compensation est nécessaire')
 
+end
 %% Compensation AvPh pour corriger le regime transitoire
 
 delta_phi = 180 - angle(polyval(num_Sx(1,:),p_des)/polyval(den_Sx,p_des))*180/pi;
@@ -70,7 +66,3 @@ den_a_XX = [0 1];
 
 Kv_XX = 1/abs(polyval(conv(num_a_XX,num_Sx(1,:)),p_des)/polyval(conv(den_a_XX,den_Sx),p_des));
 Kp_XX = -z*Kv_XX;
-
-
-
-

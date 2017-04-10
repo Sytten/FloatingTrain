@@ -1,13 +1,8 @@
 % Auteur : Pierre-Charles Gendron et Hugo Therrien
 % Date de création : 2017-04-02
-% Date d'édition : 2017-04-02
-% Description du programme : Asservissement
-clc
-close all
-clear all
+% Date d'édition : 2017-04-10
+% Description du programme : Asservissement SA-8
 
-%% Generation des constantes
-run('SM_4.m')
 
 %% Pamaretres modifiables
 %Poles desirés
@@ -76,34 +71,34 @@ print('rlocus_phi_non_compense','-dpng','-r300')
 end
 
 %% PI
-p = 0;
+p = -1E-15;
 z = real(pdes)/distance_zero_pdes;
-num_PI = [1 -z];
-den_PI = [1 -p];
-ft_PI = tf(num_PI,den_PI);
+num_PI_SA8 = [1 -z];
+den_PI_SA8 = [1 -p];
+ft_PI_SA8 = tf(num_PI_SA8,den_PI_SA8);
 
 %% AvPh
 p = -1000;
-den_AvPh = [1 -p];
+den_AvPh_SA8 = [1 -p];
 
-angle_a_des = angle((polyval(num_phi,pdes)*polyval(num_PI,pdes))/(polyval(den_phi,pdes)*polyval(den_PI,pdes)*polyval(den_AvPh,pdes)^nb_AvPh))*180/pi-360;
+angle_a_des = angle((polyval(num_phi,pdes)*polyval(num_PI_SA8,pdes))/(polyval(den_phi,pdes)*polyval(den_PI_SA8,pdes)*polyval(den_AvPh_SA8,pdes)^nb_AvPh))*180/pi-360;
 delta_z = (- 180 - angle_a_des + phase_extra)/nb_AvPh;
 z = real(pdes) - imag(pdes)/tand(delta_z);
-num_AvPh = [1 -z];
+num_AvPh_SA8 = [1 -z];
 
-ft_AvPh = tf(num_AvPh,den_AvPh);
-ft_AvPh = ft_AvPh^nb_AvPh;
-[num_AvPh, den_AvPh] = tfdata(ft_AvPh,'v');
-Ka = abs((polyval(den_phi,pdes)*polyval(den_AvPh,pdes)*polyval(den_PI,pdes))/(polyval(num_AvPh,pdes)*polyval(num_phi,pdes)*polyval(num_PI,pdes)));
-ft_AvPh = Ka*tf(num_AvPh,den_AvPh);
+ft_AvPh_SA8 = tf(num_AvPh_SA8,den_AvPh_SA8);
+ft_AvPh_SA8 = ft_AvPh_SA8^nb_AvPh;
+[num_AvPh_SA8, den_AvPh_SA8] = tfdata(ft_AvPh_SA8,'v');
+Ka_SA8 = abs((polyval(den_phi,pdes)*polyval(den_AvPh_SA8,pdes)*polyval(den_PI_SA8,pdes))/(polyval(num_AvPh_SA8,pdes)*polyval(num_phi,pdes)*polyval(num_PI_SA8,pdes)));
+ft_AvPh_SA8 = Ka_SA8*tf(num_AvPh_SA8,den_AvPh_SA8);
 
 if flag_figures==1
 figure
 hold
 plot([pdes conj(pdes)],'p');
-rlocus(ft_phi*ft_PI*ft_AvPh,1,'s');
+rlocus(ft_phi*ft_PI_SA8*ft_AvPh_SA8,1,'s');
 K = logspace(-3,2,10000);
-rlocus(ft_phi*ft_PI*ft_AvPh,K);
+rlocus(ft_phi*ft_PI_SA8*ft_AvPh_SA8,K);
 axis([-1000 150 -250 250])
 end
 
@@ -112,11 +107,11 @@ if flag_figures==1
 figure
 hold
 plot([pdes conj(pdes)],'p');
-rlocus(ft_phi*ft_AvPh,1,'s');
-rlocus(ft_phi*ft_AvPh,K);
+rlocus(ft_phi*ft_AvPh_SA8*ft_PI_SA8,1,'s');
+rlocus(ft_phi*ft_AvPh_SA8*ft_PI_SA8,K);
 axis([-1000 150 -250 250])
 end
-ftbo_phi_AvPh_PI = ft_phi*ft_PI*ft_AvPh;
+ftbo_phi_AvPh_PI = ft_phi*ft_PI_SA8*ft_AvPh_SA8;
 ftbf_phi_AvPh_PI = feedback(ftbo_phi_AvPh_PI,1);
 [num_ftbf,den_ftbf] = tfdata(ftbf_phi_AvPh_PI,'v');
 
