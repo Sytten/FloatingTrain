@@ -1,4 +1,4 @@
-function [M, O, E, Vreel] = interpolation(N, V, T)
+function [coeff, Ltr, E, Vreel, M, tt, O] = interpolation(N, V, T)
 
 pas = 101; % Pas integration
 
@@ -38,5 +38,5 @@ for i = 1:O_taille
 end
 
 O = [O; polyval(coeff, O); polyval(coeff_d, O)];
-
+tt = L/Vreel;
 end

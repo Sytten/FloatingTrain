@@ -12,10 +12,10 @@ retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
 
 
 %% Trajectoires Aller
-[aller_int,points,Erreur,Vreel] = interpolation(aller,Valler,T);
+[coeff, Ltr, E, Vr, M, tt, O] = interpolation(aller,Valler,T);
 
 %% Trajectoire Retour
-[retour_int,points2,Erreur2,Vreel2] = interpolation(retour,Vretour,T);
+[coeff1, Ltr1, E1, Vr1, M1, tt1, O1] = interpolation(retour,Vretour,T);
 
 %% Relier gauche
 % dx = (length(aller)-1)/101;
@@ -61,13 +61,13 @@ hold on
 plot(aller(1,:), aller(2,:), 'o')
 plot(retour(2,:), 'o')
 
-plot(aller_int(1,:),aller_int(2,:));
-plot(points(1,:),points(2,:), 'x');
+plot(M(1,:),M(2,:));
+plot(O(1,:),O(2,:), 'x');
 
-plot(retour_int(1,:),retour_int(2,:));
-plot(points2(1,:),points2(2,:), 'x');
+plot(M1(1,:),M1(2,:));
+plot(O1(1,:),O1(2,:), 'x');
 
 %% Write
-% csvwrite('retour.csv', fliplr(retour_int)')
-csvwrite('aller_patient.csv', points')
+csvwrite('aller.csv', O')
+csvwrite('retour.csv', fliplr(O1)')
 
