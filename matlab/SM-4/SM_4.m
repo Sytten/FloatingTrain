@@ -45,16 +45,16 @@ A13_13 = [0,0,0,                                           1,0,0,  0,0,  0,0,  0
       
       
 A_plaque = [0,0,0,                                           1,0,0,  0,0,0;
-        0,0,0,                                           0,1,0,  0,0,0;
-        0,0,0,                                           0,0,1,  0,0,0;
+            0,0,0,                                           0,1,0,  0,0,0;
+            0,0,0,                                           0,0,1,  0,0,0;
         
-        (dFa_dPhi_e2*(YA^2+YB^2+YC^2))/Ip,0,0,           0,0,0,  dFa_dia_e/Ip,0,0;
-        0,(dFa_dPhi_e2*(XA^2+XB^2+XC^2))/Ip,0,           0,0,0,  0,dFa_dia_e/Ip,0;
-        0,0,(dFa_dPhi_e2*3)/(masseS+masseP),             0,0,0,  0,0,dFa_dia_e/(masseS+masseP);
+            (dFa_dPhi_e2*(YA^2+YB^2+YC^2))/Ip,0,0,           0,0,0,  dFa_dia_e/Ip,0,0;
+            0,(dFa_dPhi_e2*(XA^2+XB^2+XC^2))/Ip,0,           0,0,0,  0,dFa_dia_e/Ip,0;
+            0,0,(dFa_dPhi_e2*3)/(masseS+masseP),             0,0,0,  0,0,dFa_dia_e/(masseS+masseP);
         
-        0,0,0,                                           0,0,0,  -Ra/La,0,0;
-        0,0,0,                                           0,0,0,  0,-Rb/Lb,0;
-        0,0,0,                                           0,0,0,  0,0,-Rc/Lc;];
+            0,0,0,                                           0,0,0,  -Ra/La,0,0;
+            0,0,0,                                           0,0,0,  0,-Rb/Lb,0;
+            0,0,0,                                           0,0,0,  0,0,-Rc/Lc;];
     
 B_plaque = [0,0,0;
             0,0,0;
@@ -86,9 +86,9 @@ B_phi = B_plaque([1,4,7],1);
 B_theta = B_plaque([2,5,8],2);
 B_z = B_plaque([3,6,9],3);
 
-% C_phi = [1, 0, 0]; Permet de sortir seulement 1 variable
-% C_theta = [0,1,0];
-% C_z = [0,0,1];
+C_phi = [1, 0, 0]; %Permet de sortir seulement 1 variable
+C_theta = [1,0,0];
+C_z = [1,0,0];
 
 D_phi_1sortie=0;
 D_theta_1sortie=0;
@@ -98,6 +98,8 @@ D_phi = [0;0;0];
 D_theta = [0;0;0];
 D_z = [0;0;0];
 
+[num_z, den_z] = ss2tf(A_z,B_z,C_z,D_z_1sortie);
+FT_pz = tf(num_z,den_z)
 
 %% Systeme sphere
 
