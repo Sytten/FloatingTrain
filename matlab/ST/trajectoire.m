@@ -4,17 +4,18 @@ close all
 clc
 
 T = 1/30; % Periode echantillonage
-V = 0.25; % vitesse constante
+Valler = 0.5; % vitesse constante
+Vretour = 0.5;
 
 aller = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0;1.5, 2.2, 2.8, 3.5, 2.5, 2.0, 3.0]; % X, Y
 retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
 
 
 %% Trajectoires Aller
-[aller_int,points] = interpolation(aller,V,T);
+[aller_int,points,Erreur,Vreel] = interpolation(aller,Valler,T);
 
 %% Trajectoire Retour
-[retour_int,points2] = interpolation(retour,V,T);
+[retour_int,points2,Erreur2,Vreel2] = interpolation(retour,Vretour,T);
 
 %% Relier gauche
 % dx = (length(aller)-1)/101;
@@ -68,5 +69,5 @@ plot(points(1,:).*10,points(2,:).*10, 'x');
 
 %% Write
 % csvwrite('retour.csv', fliplr(retour_int)')
-csvwrite('aller.csv', points')
+csvwrite('aller_patient.csv', points')
 

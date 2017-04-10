@@ -1,4 +1,4 @@
-function [M, O] = interpolation(N, V, T)
+function [M, O, E, Vreel] = interpolation(N, V, T)
 
 pas = 101; % Pas integration
 
