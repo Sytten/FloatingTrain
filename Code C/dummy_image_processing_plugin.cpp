@@ -10,15 +10,16 @@
 #include <complex>
 #include <stdlib.h>
 #include <chrono>
+#include <vector>
 #include "image_processing_plugin.h"
 using namespace std;
 using namespace std::chrono;
-#define DEBUG_TIME
+//#define DEBUG_TIME
 
 class DummyImageProcessingPlugin : public ImageProcessingPlugin
 {
 public:
-	DummyImageProcessingPlugin(); 			
+	DummyImageProcessingPlugin();
 	virtual ~DummyImageProcessingPlugin();
 	/*! \brief Receive an image to process.
 	 *
@@ -57,23 +58,27 @@ private:
 	#define SPHERE_LOOKUP_TOP_LEFT 1
 	#define SPHERE_LOOKUP_TOP_RIGHT 2
 	#define SPHERE_LOOKUP_BOTTOM_RIGHT 3
-	#define LOOKUP_OVERLAP 35
-	
+	#define LOOKUP_OVERLAP 28
+	#define WINDOW_SIZE 128
+	#define WINDOW_SIZE_256 128
+
 	#define SPHERE_LOOKUP_RANDOM 4
 
-	struct CoordBille 
+	struct CoordBille
 	{
 		int x;
 		int y;
 	};
-	
+
 	//Membres privee
 	int lastPosX = -1;
 	int lastPosY = -1;
 	int sphereNotFoundCounter = 0;
 	vector<CoordBille> PositionsBilles_Prec; //Vecteur ordonnée de la position la plus ancienne jusqua la plus récente (max 7 position enregistré)
 	complex<float>** billeComplex;
-	
+	complex<float>** billeComplex256;
+	int counter_miss = 0;
+
 	//Methode privee
 	// Cree la nouvelle image du plateau, normalisée entre 0 et 1, paddé aux dimensions requises
 	complex<float>** PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight);
@@ -88,7 +93,7 @@ private:
     void MultiplicationComplexe(complex<float>** fft1, complex<float>** fft2, int sizeX, int sizeY);
 	void PositionBille(complex<float>** correlation, int tailleX, int tailleY, int pointXCrop, int pointYCrop, float seuil, int* outPosX, int* outPosY);
 	void CalculVitesse(unsigned int ordreMax, int* out_VitesseX, int* out_VitesseY);
-	
+
 	//Image de la bille normalise
 	const float billeNorm[SIZE_BILLE*SIZE_BILLE] = { 	0.34370440, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
 														0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.24958678, 0.24958678, 0.061351482, 0.061351482, 0.14370443, 0.14370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443, 0.34370443,
@@ -118,8 +123,12 @@ private:
 DummyImageProcessingPlugin::DummyImageProcessingPlugin()
 {
 	//Construire image de la bille avec padding jusqua la 256 et 512
-	billeComplex =PadBille(DummyImageProcessingPlugin::billeNorm, 256, 256);
-	if(!FFT2D(billeComplex,256,256,FORWARD) ) //Forward FFT
+	billeComplex =PadBille(DummyImageProcessingPlugin::billeNorm, WINDOW_SIZE, WINDOW_SIZE);
+	if(!FFT2D(billeComplex,WINDOW_SIZE,WINDOW_SIZE,FORWARD) ) //Forward FFT
+		cout << "FFT bille 256 failed" << endl;
+
+	billeComplex256 =PadBille(DummyImageProcessingPlugin::billeNorm, WINDOW_SIZE_256, WINDOW_SIZE_256);
+	if(!FFT2D(billeComplex256,WINDOW_SIZE_256,WINDOW_SIZE_256,FORWARD) ) //Forward FFT
 		cout << "FFT bille 256 failed" << endl;
 
 	srand (time(NULL));
@@ -136,11 +145,11 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	#ifdef DEBUG_TIME
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	#endif
-	
+
 	out_dXPos = -1.0;
 	out_dYPos = -1.0;
 
-	int seuil = 20;
+	int seuil = 17;
 	int cropW;
 	int cropH;
 	int cropX;
@@ -153,39 +162,39 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	// If the previous position of the sphere is not known, we analyze an incomplete quadrant of the image
 	if(lastPosX == -1 || lastPosY == -1)
 	{
-		cropW = 256-SIZE_BILLE-1;
-		cropH = 256-SIZE_BILLE-1;
+		cropW = WINDOW_SIZE_256-SIZE_BILLE-1;
+		cropH = WINDOW_SIZE_256-SIZE_BILLE-1;
 
 		// Selects which quadrant of the image to analyze (or a random position)
 		switch (sphereNotFoundCounter){
 			case SPHERE_LOOKUP_BOTTOM_LEFT:
-				cropX = (in_unWidth/2)-cropW+LOOKUP_OVERLAP;
+				cropX = (in_unWidth>>1)-cropW+LOOKUP_OVERLAP;
 				if(cropX < 0)
 					cropX = 0;
-				cropY = (in_unHeight/2)-LOOKUP_OVERLAP;
+				cropY = (in_unHeight>>1)-LOOKUP_OVERLAP;
 				break;
 
 			case SPHERE_LOOKUP_TOP_LEFT:
-				cropX = (in_unWidth/2)-cropW+LOOKUP_OVERLAP;
+				cropX = (in_unWidth>>1)-cropW+LOOKUP_OVERLAP;
 				if(cropX < 0)
 					cropX = 0;
-				cropY = (in_unHeight/2)-cropH+LOOKUP_OVERLAP;
+				cropY = (in_unHeight>>1)-cropH+LOOKUP_OVERLAP;
 				if(cropY < 0)
 					cropY  = 0;
 				break;
 
 			case SPHERE_LOOKUP_TOP_RIGHT:
-				cropX = (in_unWidth/2)-LOOKUP_OVERLAP;
-				cropY = (in_unHeight/2)-cropH+LOOKUP_OVERLAP;
+				cropX = (in_unWidth>>1)-LOOKUP_OVERLAP;
+				cropY = (in_unHeight>>1)-cropH+LOOKUP_OVERLAP;
 				if(cropY < 0)
 					cropY  = 0;
 				break;
 
 			case SPHERE_LOOKUP_BOTTOM_RIGHT:
-				cropX = (in_unWidth/2)-LOOKUP_OVERLAP;
-				cropY = (in_unHeight/2)-LOOKUP_OVERLAP;
+				cropX = (in_unWidth>>1)-LOOKUP_OVERLAP;
+				cropY = (in_unHeight>>1)-LOOKUP_OVERLAP;
 				break;
-	
+
 			default:	// Random lookup
 				cropX = rand() % (in_unWidth - cropW);
 				cropY = rand() % (in_unHeight - cropH);
@@ -203,24 +212,24 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 			cropH -= (cropY + cropH) - in_unHeight;
 		}
 
-		padW = 256;
-		padH = 256;
-		
+		padW = WINDOW_SIZE_256;
+		padH = WINDOW_SIZE_256;
+
 		plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
-	
-		if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT 
+
+		if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT
 			cout << "FFT Plateau Failed" << endl;
 
-		// Multiplication Complexe 
-		MultiplicationComplexe(plateauComplex, billeComplex, padW,padH);
+		// Multiplication Complexe
+		MultiplicationComplexe(plateauComplex, billeComplex256, padW,padH);
 
 	}
 	// If the previous position of the sphere is known, we analyze a subsection of the image
 	else
 	{
 		sphereNotFoundCounter = -1;
-		cropW = 256-SIZE_BILLE-1;
-		cropH = 256-SIZE_BILLE-1;
+		cropW = WINDOW_SIZE-SIZE_BILLE-1;
+		cropH = WINDOW_SIZE-SIZE_BILLE-1;
 		cropX = lastPosX-(cropW/2);
 		cropY = lastPosY-(cropH/2);
 		// Checks to make sure we don't try to crop out of bounds
@@ -233,24 +242,24 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 		if(cropY+cropH > (signed int)in_unHeight)
 			cropH -= (cropY + cropH) - in_unHeight;
 
-		padW = 256;
-		padH = 256;
+		padW = WINDOW_SIZE;
+		padH = WINDOW_SIZE;
 
 		plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
-	
-		if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT 
+
+		if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT
 			cout << "FFT Plateau Failed" << endl;
 
-		// Multiplication Complexe 
+		// Multiplication Complexe
 		MultiplicationComplexe(plateauComplex, billeComplex, padW,padH);
 	}
-	
+
 	if (!FFT2D(plateauComplex, padW,padH,REVERSE) )// Reverse FFT
 		cout << "Correlation  Failed!!!l" << endl;
 
 
     // Détection et position de la bille
-	int positionX,positionY;   
+	int positionX,positionY;
     PositionBille(plateauComplex,padW,padH, cropX, cropY, seuil, &positionX,&positionY);
 
 	lastPosX = positionX;
@@ -258,11 +267,15 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	out_dXPos = positionX;
 	out_dYPos = positionY;
 
-	if(lastPosX == -1 || lastPosY == -1)
+	if(lastPosX == -1 || lastPosY == -1) {
 		sphereNotFoundCounter++;
-                                                                               
+		counter_miss++;
+		cout << "Sphere not found: " << counter_miss << endl;
+	}
+
+
 	delete plateauComplex;
-	
+
 	#ifdef DEBUG_TIME
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(t2-t1).count();
@@ -274,21 +287,21 @@ void DummyImageProcessingPlugin::OnBallPosition(double in_dXPos, double in_dYPos
 {
 	//Declarations Variable
 	int vitesseX,vitesseY;
-	
+
 	CoordBille NouvellePosition;
 	NouvellePosition.x = in_dXPos;
 	NouvellePosition.y = in_dYPos;
-	
+
 	//Ajouter position recu dans le vecteur
 	PositionsBilles_Prec.push_back(NouvellePosition);
-	
+
 	//Retirer le premier element si la taille depasse 7
 	if(PositionsBilles_Prec.size() > 7)
 		PositionsBilles_Prec.erase (PositionsBilles_Prec.begin(),PositionsBilles_Prec.begin()+1);
-	
-	
+
+
 	CalculVitesse(ORDRE_DIFF,&vitesseX,&vitesseY);
-	
+
 	out_dXDiff = vitesseX;
 	out_dYDiff = vitesseY;
 
@@ -296,13 +309,13 @@ void DummyImageProcessingPlugin::OnBallPosition(double in_dXPos, double in_dYPos
 
 complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_array<uint8_t> in_ptrImage, unsigned int inWidth, unsigned int inHeight, unsigned int cropWidth, unsigned int cropHeight, unsigned int cropX, unsigned int cropY, unsigned int outWidth,unsigned int outHeight)
 {
-	complex<float>** plateauPad = new complex<float>* [outHeight]();
+	complex<float>** plateauPad = new complex<float>* [outHeight](); // TODO: optimize creation array
 
 	for(int height = 0; height < (signed int)outHeight; height++)
 	{
 		plateauPad[height] = new complex<float>[outWidth]();
 	}
-	
+
 	// Copies a subsection of the image, from int8 to float (0.0-1.0) to a new array
 	int newHeight = 0;
 	for(int oldHeight = cropY; oldHeight < (signed int)(cropY+cropHeight); oldHeight++)
@@ -315,7 +328,7 @@ complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_
 		}
 		newHeight++;
 	}
-	
+
 	return plateauPad;
 }
 
@@ -323,14 +336,14 @@ complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_
 // Padding de la bille normalisée
 complex<float>** DummyImageProcessingPlugin::PadBille(const float* billeNorm, unsigned int outHeight, unsigned int outWidth)
 {
-	complex<float>** billeNormPad = new complex<float>* [outHeight](); 
-	
+	complex<float>** billeNormPad = new complex<float>* [outHeight]();
+
 
 	for(int height = 0; height < (signed int)outHeight; height++)
 	{
 		billeNormPad[height] = new complex<float>[outWidth]();
-	}	
-	
+	}
+
 	for(int height = 0; height < SIZE_BILLE; height++)
 	{
 		for(int width = 0; width < SIZE_BILLE; width++)
@@ -338,7 +351,7 @@ complex<float>** DummyImageProcessingPlugin::PadBille(const float* billeNorm, un
 			billeNormPad[height][width].real(billeNorm[width + SIZE_BILLE*height]);
 		}
 	}
-	
+
 	return billeNormPad;
 }
 
@@ -375,11 +388,8 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 	   if (real == NULL || imag == NULL)
 		  return(false);
 	   if (!Powerof2(nx,&m,&twopm) || twopm != nx)
-		  return(false);struct CoordBille 
-{
-	int x;
-	int y;
-};
+		  return(false);
+
 	   for (j=0;j<ny;j++) {
 		  for (i=0;i<nx;i++) {
 		     real[i] = c[i][j].real();
@@ -391,12 +401,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		     c[i][j].imag(imag[i]);
 		  }
 	   }
-	   free(real);
-	   free(imag);
 
-	   /* Transform the columns */
-	   real = (float *)malloc(ny * sizeof(float));
-	   imag = (float *)malloc(ny * sizeof(float));
 	   if (real == NULL || imag == NULL)
 		  return(false);
 	   if (!Powerof2(ny,&m,&twopm) || twopm != ny)
@@ -447,8 +452,8 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 
 	   /* Calculate the number of points */
 	   nn = 1<<m;
-	   
-		  
+
+
 	   /* Do the bit reversal */
 	   i2 = nn >> 1;
 	   j = 0;
@@ -492,6 +497,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		     u2 = u1 * c2 + u2 * c1;
 		     u1 = z;
 		  }
+			//cout << c1 << endl;
 		  c2 = sqrt((1.0 - c1) / 2.0);
 		  if (dir == 1)
 		     c2 = -c2;
@@ -546,14 +552,14 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 			}
 		}
 	}
-	
+
 	// Retourne la position de la bille dans le tableau de la corrélation
 	void DummyImageProcessingPlugin::PositionBille(complex<float>** correlation, int tailleX, int tailleY, int pointXCrop, int pointYCrop, float seuil, int* outPosX, int* outPosY)
 	{
 		int posX_max = -1;
 		int posY_max = -1;
 		float val_max = 0.0;
-	
+
 		// Trouve la valeur maximale de la corrélation
 		for(int height = 0; height < tailleY; height++)
 		{
@@ -568,7 +574,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 			}
 		}
 		//cout << "v: " << val_max << " x: " << posX_max << "y: " << posY_max << endl;
-	
+
 		// Si la valeur maximale est plus grande que le seuil, on retourne la position de la bille
 		if(val_max > seuil)
 		{
@@ -593,13 +599,13 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		{
 			ordreMax = 6;
 		}
-	
-	
+
+
 		// Déterminer l'ordre possible
 		int ordrePossible;
 		int TailleVecteur = PositionsBilles_Prec.size();
-	
-		if( TailleVecteur> (signed int)ordreMax)	
+
+		if( TailleVecteur> (signed int)ordreMax)
 		{
 			ordrePossible = ordreMax;
 		}
@@ -607,7 +613,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		{
 			ordrePossible = TailleVecteur -1;
 		}
-	
+
 		switch(ordrePossible)
 		{
 			case 1: // Ordre 1
