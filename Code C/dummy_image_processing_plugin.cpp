@@ -5,19 +5,15 @@
  *      Author: chaj1907, micj1901
  *						carj2124, mcgj2701
  */
-
-
-//#define DEBUG
 #include <cstdint>
 #include <iostream>
 #include <complex>
-#include <chrono>
 #include <stdlib.h>
-#include <time.h>
+#include <chrono>
 #include "image_processing_plugin.h"
 using namespace std;
-using namespace std::chrono; 
-
+using namespace std::chrono;
+#define DEBUG_TIME
 
 class DummyImageProcessingPlugin : public ImageProcessingPlugin
 {
@@ -137,10 +133,10 @@ DummyImageProcessingPlugin::~DummyImageProcessingPlugin()
 void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_ptrImage, unsigned int in_unWidth, unsigned int in_unHeight,
 		double & out_dXPos, double & out_dYPos)
 {
-	#ifdef DEBUG
+	#ifdef DEBUG_TIME
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	#endif // DEBUG
-
+	#endif
+	
 	out_dXPos = -1.0;
 	out_dYPos = -1.0;
 
@@ -194,28 +190,23 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 				cropX = rand() % (in_unWidth - cropW);
 				cropY = rand() % (in_unHeight - cropH);
 				sphereNotFoundCounter = SPHERE_LOOKUP_RANDOM;
-				
 				break;
-
 		}
 
 		// Checks to make sure we don't try to crop out of bounds
-		if(cropX+cropW > in_unWidth)
+		if(cropX+cropW > (signed int)in_unWidth)
 		{
 			cropW -= (cropX + cropW) - in_unWidth;
 		}
-		if(cropY+cropH > in_unHeight)
+		if(cropY+cropH > (signed int)in_unHeight)
 		{
 			cropH -= (cropY + cropH) - in_unHeight;
 		}
 
 		padW = 256;
 		padH = 256;
-
-		high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
+		
 		plateauComplex = PlateauNormPad(in_ptrImage, in_unWidth , in_unHeight , cropW, cropH, cropX, cropY, padW, padH);
-	
 	
 		if(!FFT2D(plateauComplex,padW,padH,FORWARD) ) //Forward FFT 
 			cout << "FFT Plateau Failed" << endl;
@@ -237,9 +228,9 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 			cropX = 0;
 		if(cropY < 0)
 			cropY = 0;
-		if(cropX+cropW > in_unWidth)
+		if(cropX+cropW > (signed int)in_unWidth)
 			cropW -= (cropX + cropW) - in_unWidth;
-		if(cropY+cropH > in_unHeight)
+		if(cropY+cropH > (signed int)in_unHeight)
 			cropH -= (cropY + cropH) - in_unHeight;
 
 		padW = 256;
@@ -262,17 +253,6 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	int positionX,positionY;   
     PositionBille(plateauComplex,padW,padH, cropX, cropY, seuil, &positionX,&positionY);
 
-	// Temps
-	#ifdef DEBUG
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>( t2 - t1 ).count();
-    cout << "Recherche: " << duration/1000.0 << "ms" << endl;;
-	
-	cout << "PositionX : " << positionX << endl;
-	cout << "PositionY: " << positionY << endl;
-	#endif // DEBUG
-
-
 	lastPosX = positionX;
 	lastPosY = positionY;
 	out_dXPos = positionX;
@@ -282,6 +262,12 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 		sphereNotFoundCounter++;
                                                                                
 	delete plateauComplex;
+	
+	#ifdef DEBUG_TIME
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(t2-t1).count();
+	cout << "Duration: " << duration/1000.0 << endl;
+	#endif
 }
 
 void DummyImageProcessingPlugin::OnBallPosition(double in_dXPos, double in_dYPos, double & out_dXDiff, double & out_dYDiff)
@@ -312,17 +298,17 @@ complex<float>** DummyImageProcessingPlugin::PlateauNormPad(const boost::shared_
 {
 	complex<float>** plateauPad = new complex<float>* [outHeight]();
 
-	for(int height = 0; height < outHeight; height++)
+	for(int height = 0; height < (signed int)outHeight; height++)
 	{
 		plateauPad[height] = new complex<float>[outWidth]();
 	}
 	
 	// Copies a subsection of the image, from int8 to float (0.0-1.0) to a new array
 	int newHeight = 0;
-	for(int oldHeight = cropY; oldHeight < cropY+cropHeight; oldHeight++)
+	for(int oldHeight = cropY; oldHeight < (signed int)(cropY+cropHeight); oldHeight++)
 	{
 		int newColumn = 0;
-		for(int oldColumn = cropX*3; oldColumn < cropX*3+cropWidth*3; oldColumn += 3)
+		for(int oldColumn = cropX*3; oldColumn < (signed int)(cropX*3+cropWidth*3); oldColumn += 3)
 		{
 			plateauPad[newHeight][newColumn].real((float)(in_ptrImage[oldColumn + inWidth*3*oldHeight]) / 255.0);
 			newColumn++;
@@ -340,7 +326,7 @@ complex<float>** DummyImageProcessingPlugin::PadBille(const float* billeNorm, un
 	complex<float>** billeNormPad = new complex<float>* [outHeight](); 
 	
 
-	for(int height = 0; height < outHeight; height++)
+	for(int height = 0; height < (signed int)outHeight; height++)
 	{
 		billeNormPad[height] = new complex<float>[outWidth]();
 	}	
@@ -460,10 +446,9 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 	   float c1,c2,tx,ty,t1,t2,u1,u2,z;
 
 	   /* Calculate the number of points */
-	   nn = 1;
-	   for (i=0;i<m;i++)
-		  nn *= 2;
-
+	   nn = 1<<m;
+	   
+		  
 	   /* Do the bit reversal */
 	   i2 = nn >> 1;
 	   j = 0;
@@ -614,7 +599,7 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 		int ordrePossible;
 		int TailleVecteur = PositionsBilles_Prec.size();
 	
-		if( TailleVecteur> ordreMax)	
+		if( TailleVecteur> (signed int)ordreMax)	
 		{
 			ordrePossible = ordreMax;
 		}
@@ -623,38 +608,31 @@ int DummyImageProcessingPlugin::NextPowerOfTwo(int num)
 			ordrePossible = TailleVecteur -1;
 		}
 	
-		//Appliquer l'équation de dérivation correspondante 
 		switch(ordrePossible)
 		{
 			case 1: // Ordre 1
 				*out_VitesseX = (PositionsBilles_Prec.at(TailleVecteur-1).x - PositionsBilles_Prec.at(TailleVecteur-2).x);
 				*out_VitesseY = (PositionsBilles_Prec.at(TailleVecteur-1).y - PositionsBilles_Prec.at(TailleVecteur-2).y);
-				cout << "Order was 1"  << endl;
 				break;
 			case 2: // Ordre 2
 				*out_VitesseX = (3*PositionsBilles_Prec.at(TailleVecteur-1).x - 4*PositionsBilles_Prec.at(TailleVecteur-2).x + PositionsBilles_Prec.at(TailleVecteur-3).x)/2;
 				*out_VitesseY = (3*PositionsBilles_Prec.at(TailleVecteur-1).y - 4*PositionsBilles_Prec.at(TailleVecteur-2).y + PositionsBilles_Prec.at(TailleVecteur-3).y)/2;
-				cout << "Order was 2"  << endl;
 				break;
 			case 3: // Ordre 3
 				*out_VitesseX = (11*PositionsBilles_Prec.at(TailleVecteur-1).x - 18*PositionsBilles_Prec.at(TailleVecteur-2).x + 9*PositionsBilles_Prec.at(TailleVecteur-3).x- 2*PositionsBilles_Prec.at(TailleVecteur-4).x)/6;
 				*out_VitesseY = (11*PositionsBilles_Prec.at(TailleVecteur-1).y - 18*PositionsBilles_Prec.at(TailleVecteur-2).y + 9*PositionsBilles_Prec.at(TailleVecteur-3).y- 2*PositionsBilles_Prec.at(TailleVecteur-4).y)/6;
-				cout << "Order was 3"  << endl;
 				break;
 			case 4:
 				*out_VitesseX = (25*PositionsBilles_Prec.at(TailleVecteur-1).x - 48*PositionsBilles_Prec.at(TailleVecteur-2).x + 36*PositionsBilles_Prec.at(TailleVecteur-3).x- 16*PositionsBilles_Prec.at(TailleVecteur-4).x + 3*PositionsBilles_Prec.at(TailleVecteur-5).x)/12;
 				*out_VitesseY = (25*PositionsBilles_Prec.at(TailleVecteur-1).y - 48*PositionsBilles_Prec.at(TailleVecteur-2).y + 36*PositionsBilles_Prec.at(TailleVecteur-3).y- 16*PositionsBilles_Prec.at(TailleVecteur-4).y + 3*PositionsBilles_Prec.at(TailleVecteur-5).y)/12;
-				cout << "Order was 4"  << endl;
 				break;
 			case 5:
 				*out_VitesseX = (137*PositionsBilles_Prec.at(TailleVecteur-1).x - 300*PositionsBilles_Prec.at(TailleVecteur-2).x + 300*PositionsBilles_Prec.at(TailleVecteur-3).x- 200*PositionsBilles_Prec.at(TailleVecteur-4).x + 75*PositionsBilles_Prec.at(TailleVecteur-5).x - 12*PositionsBilles_Prec.at(TailleVecteur-6).x)/60;
 				*out_VitesseY = (137*PositionsBilles_Prec.at(TailleVecteur-1).y - 300*PositionsBilles_Prec.at(TailleVecteur-2).y + 300*PositionsBilles_Prec.at(TailleVecteur-3).y- 200*PositionsBilles_Prec.at(TailleVecteur-4).y + 75*PositionsBilles_Prec.at(TailleVecteur-5).y - 12*PositionsBilles_Prec.at(TailleVecteur-6).y)/60;
-				cout << "Order was 5"  << endl;
 				break;
 			case 6:
 				*out_VitesseX = (147*PositionsBilles_Prec.at(TailleVecteur-1).x - 360*PositionsBilles_Prec.at(TailleVecteur-2).x + 450*PositionsBilles_Prec.at(TailleVecteur-3).x- 400*PositionsBilles_Prec.at(TailleVecteur-4).x + 225*PositionsBilles_Prec.at(TailleVecteur-5).x - 72*PositionsBilles_Prec.at(TailleVecteur-6).x + 10*PositionsBilles_Prec.at(TailleVecteur-7).x)/60;
 				*out_VitesseY = (147*PositionsBilles_Prec.at(TailleVecteur-1).y - 360*PositionsBilles_Prec.at(TailleVecteur-2).y + 450*PositionsBilles_Prec.at(TailleVecteur-3).y- 400*PositionsBilles_Prec.at(TailleVecteur-4).y + 225*PositionsBilles_Prec.at(TailleVecteur-5).y - 72*PositionsBilles_Prec.at(TailleVecteur-6).y + 10*PositionsBilles_Prec.at(TailleVecteur-7).y)/60;
-				cout << "Order was 6"  << endl;
 				break;
 			default :
 				*out_VitesseX = 0;
