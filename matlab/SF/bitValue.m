@@ -1,6 +1,5 @@
-function [ b ] = bitValue(x, threshold )
-    m = sqrt(mean(x.^2));
-    if m >= threshold
+function [ b ] = bitValue(x, t1 )
+    if x >= t1
         b = 1;
     else
         b = 0;
