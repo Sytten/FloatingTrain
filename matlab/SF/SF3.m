@@ -7,6 +7,7 @@ close all
 clear all
 clc
 
+
 load('signaux.mat')
 
 signal = signal_3b_2;
