@@ -167,7 +167,9 @@ for n = 1:1:N
         end
         [vitesseX,vitesseY] = CalculVitesse(BillePositions,6);
 %If ordreMax is impossible return 0 0
-        plot(xPosBille, yPosBille,'b.','MarkerSize',20)
+        plot(xPosBille, yPosBille,'g.','MarkerSize',30)
+        text(xPosBille+20, yPosBille, ['x: ' num2str(xPosBille) ' y: ' num2str(yPosBille)]);
+        text(xPosBille+20, yPosBille+20, ['vx: ' num2str(vitesseX) ' vy: ' num2str(vitesseY)]);
         disp(['La bille est presente à x:', num2str(xPosBille), ' y:', num2str(yPosBille)]);
         disp(['La bille a une vitesse x:', num2str(vitesseX), ' y:', num2str(vitesseY)]);
     else
