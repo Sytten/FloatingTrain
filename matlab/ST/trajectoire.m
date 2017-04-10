@@ -58,14 +58,14 @@ retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
 %% Affichage
 figure 
 hold on
-plot(aller(1,:).*10, aller(2,:).*10, 'o')
-% plot(retour(2,:), 'o')
+plot(aller(1,:), aller(2,:), 'o')
+plot(retour(2,:), 'o')
 
-% plot(retour(2,:), 'o')
-plot(aller_int(1,:).*10,aller_int(2,:).*10);
-plot(points(1,:).*10,points(2,:).*10, 'x');
-% plot(retour_int(1,:),retour_int(2,:));
-% plot(points2(1,:),points2(2,:), 'x');
+plot(aller_int(1,:),aller_int(2,:));
+plot(points(1,:),points(2,:), 'x');
+
+plot(retour_int(1,:),retour_int(2,:));
+plot(points2(1,:),points2(2,:), 'x');
 
 %% Write
 % csvwrite('retour.csv', fliplr(retour_int)')
