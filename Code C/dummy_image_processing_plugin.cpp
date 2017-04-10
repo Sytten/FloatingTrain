@@ -7,7 +7,7 @@
  */
 
 
-#define DEBUG
+//#define DEBUG
 #include <cstdint>
 #include <iostream>
 #include <complex>
@@ -267,11 +267,11 @@ void DummyImageProcessingPlugin::OnImage(const boost::shared_array<uint8_t> in_p
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( t2 - t1 ).count();
     cout << "Recherche: " << duration/1000.0 << "ms" << endl;;
-	#endif // DEBUG
-	
 	
 	cout << "PositionX : " << positionX << endl;
 	cout << "PositionY: " << positionY << endl;
+	#endif // DEBUG
+
 
 	lastPosX = positionX;
 	lastPosY = positionY;
