@@ -7,20 +7,22 @@ close all
 clear all
 clc
 
+
 load('signaux.mat')
 
-signal = signal_3a_1;
-baud = baud_3a_1;
+signal = signal_3b_2;
+baud = baud_3b_2;
 
+%% Function to filter and downsample
 [x64, y64, Fs] = passeBasDownsample(signal, time);
 
 %% filter with cheby
-[b1,a1] = filtreCheby(-5*27500,Fs,1600000);
-[b2,a2] = filtreCheby(-3*27500,Fs,1600000);
-[b3,a3] = filtreCheby(-27500,Fs,1600000);
-[b4,a4] = filtreCheby(27500,Fs,1600000);
-[b5,a5] = filtreCheby(3*27500,Fs,1600000);
-[b6,a6] = filtreCheby(5*27500,Fs,1600000);
+[b1,a1] = filtreCheby(-4.5*27500,Fs,2500000);
+[b2,a2] = filtreCheby(-2.7*27500,Fs,2500000);
+[b3,a3] = filtreCheby(-27500,Fs,2500000);
+[b4,a4] = filtreCheby(27500,Fs,2500000);
+[b5,a5] = filtreCheby(2.7*27500,Fs,2500000);
+[b6,a6] = filtreCheby(4.5*27500,Fs,2500000);
 
 h1 = freqz(b1,a1,length(x64)/2);
 h2 = freqz(b2,a2,length(x64)/2);
@@ -40,6 +42,7 @@ plot(x64(1:end/2),abs(h5).*max(abs(fft(y64))))
 plot(x64(1:end/2),abs(h6).*max(abs(fft(y64))))
 
 %% filter
+
 yz1 = filtfilt(b1,a1,y64);
 yz2 = filtfilt(b2,a2,y64);
 yz3 = filtfilt(b3,a3,y64);
