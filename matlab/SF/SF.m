@@ -9,8 +9,8 @@ clc
 
 load('signaux.mat')
 
-signal = signal_1a;
-baud = baud_1a;
+signal = signal_1b;
+baud = baud_1b;
 
 %% Function to filter and downsample
 [x64, y64, Fs] = passeBasDownsample(signal, time);
