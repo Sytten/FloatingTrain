@@ -1,6 +1,6 @@
 function [coeff, Ltr, E, Vreel, M, tt, O] = interpolation(N, V, T)
 
-pas = 101; % Pas integration
+pas = 1000; % Pas integration
 
 [coeff] = polyfit(N(1,:),N(2,:),length(N)-1);
 dx = (N(1,end)-N(1,1))/pas;
