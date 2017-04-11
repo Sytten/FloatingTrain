@@ -5,8 +5,6 @@ clc
 position_commande = csvread('trajectoireofficielle/aller_interpole.csv')';
 position_mesure = csvread('trajectoireofficielle/trajectoire_aller_asservie.csv')';
 
-dx = length(position_mesure)/length(position_commande);
-position_down = position_mesure(1:dx:end,1:2);
 %% Display
 figure
 hold on
