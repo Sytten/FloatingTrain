@@ -3,19 +3,27 @@ clear all
 close all
 clc
 
-T = 1/30; % Periode echantillonage
-Valler = 0.5; % vitesse constante
-Vretour = 0.5;
+load('trajectoire.mat')
 
-aller = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0;1.5, 2.2, 2.8, 3.5, 2.5, 2.0, 3.0]; % X, Y
-retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
+NAB = NAB';
+NBA = flipud(NBA)';
+
+% NAB = NAB +1;
+% NBA = NBA +1;
+
+% T = 1/30; % Periode echantillonage
+% Valler = 0.5; % vitesse constante
+% Vretour = 0.5;
+% 
+%aller = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0;1.5, 2.2, 2.8, 3.5, 2.5, 2.0, 3.0]; % X, Y
+%retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
 
 
 %% Trajectoires Aller
-[coeff, Ltr, E, Vr, M, tt, O] = interpolation(aller,Valler,T);
+[coeff, Ltr, E, Vr, M, tt, O] = interpolation(NAB,vAB,Ts);
 
 %% Trajectoire Retour
-[coeff1, Ltr1, E1, Vr1, M1, tt1, O1] = interpolation(retour,Vretour,T);
+[coeff1, Ltr1, E1, Vr1, M1, tt1, O1] = interpolation(NBA,vBA,Ts);
 
 %% Relier gauche
 % dx = (length(aller)-1)/101;
@@ -58,8 +66,8 @@ retour = [1, 2, 3, 4, 5, 6;7.4, 10.1, 13, 10, 11, 7.5]; % X, Y
 %% Affichage
 figure 
 hold on
-plot(aller(1,:), aller(2,:), 'o')
-plot(retour(2,:), 'o')
+plot(NAB(1,:), NAB(2,:), 'o')
+plot(NBA(1,:), NBA(2,:), 'o')
 
 plot(M(1,:),M(2,:));
 plot(O(1,:),O(2,:), 'x');

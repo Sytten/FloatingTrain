@@ -27,7 +27,7 @@ d = L/O_taille;
 
 O = [];
 Ltr = [0];
-xi = 1;
+xi = N(1,1);
 O = [xi];
 for i = 1:O_taille
     Ltr(i) = d*(i-1);
