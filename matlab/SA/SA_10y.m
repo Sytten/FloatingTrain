@@ -1,4 +1,4 @@
-% Auteur : Pierre-Charles Gendron
+% Auteur : Pierre-Charles Gendron, Antoine Mailhot et Hugo Therrien
 % Date de création : 2017-04-08
 % Date d'édition : 2017-04-10
 % Description du programme : Asservissement de la position y et vitesse 
@@ -68,7 +68,7 @@ den_a_YY = [0 1];
 Kv_YY = 1/abs(polyval(conv(num_a_YY,num_Sy(1,:)),p_des)/polyval(conv(den_a_YY,den_Sy),p_des));
 Kp_YY = -z*Kv_YY;
 
-%% axe x
+%% axe y
 
 [num_Sx, den_Sx] = ss2tf(AxS,BxS,CxS,DxS);
 FT_XX = tf(num_Sx(2,:),den_Sx);

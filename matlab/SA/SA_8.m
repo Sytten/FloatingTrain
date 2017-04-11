@@ -71,7 +71,7 @@ print('rlocus_phi_non_compense','-dpng','-r300')
 end
 
 %% PI
-p = -1E-15;
+p = -1E-8;
 z = real(pdes)/distance_zero_pdes;
 num_PI_SA8 = [1 -z];
 den_PI_SA8 = [1 -p];
