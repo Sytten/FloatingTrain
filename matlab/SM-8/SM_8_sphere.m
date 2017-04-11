@@ -1,50 +1,46 @@
 clc
 close all
 
-%Entrée :phi 
+%Entrée :theta
 %sortie : X sphère
-[a_phi_x, b_phi_x] = ss2tf(AxS,BxS,CxS,DxS,1);
+[a_xs, b_xs] = ss2tf(AxS,BxS,CxS,DxS,1);
 
-FT_phi_X = tf(a_phi_x(1,:),b_phi_x)
+FT_xs = tf(a_xs(1,:),b_xs)
 figure 
-rlocus(FT_phi_X)
-title('FT Xs / \phi')
-VP_phi = eig(AxS)
-print('Lieu_Xs_sphere','-dpng','-r300')
+rlocus(FT_xs)
+title('FT X sphère')
+VP_xs = eig(AxS)
+print('Lieu_X_sphere','-dpng','-r300')
 
-%Entrée :phi 
+%Entrée :theta
 %sortie : omegaX sphère
-[a_phi_x, b_phi_x] = ss2tf(AxS,BxS,CxS,DxS,1);
 
-FT_phi_omega = tf(a_phi_x(2,:),b_phi_x)
+FT_omega_xs = tf(a_xs(2,:),b_xs)
 figure 
-rlocus(FT_phi_omega)
-title('FT \omega_X / \phi')
-VP_phi = eig(AxS)
+rlocus(FT_omega_xs)
+title('FT \omega_xs ')
 print('Lieu_omegaX_sphere','-dpng','-r300')
 
 %%
 
 %Entrée :phi 
-%sortie : X sphère
-[a_phi_x, b_phi_x] = ss2tf(AxS,BxS,CxS,DxS,1);
+%sortie : Y sphère
+[a_ys, b_ys] = ss2tf(AyS,ByS,CyS,DyS,1);
 
-FT_phi_X = tf(a_phi_x(1,:),b_phi_x)
+FT_ys = tf(a_ys(1,:),b_ys)
 figure 
-rlocus(FT_phi_X)
-title('FT Xs / \phi')
-VP_phi = eig(AxS)
-print('Lieu_Xs_sphere','-dpng','-r300')
+rlocus(FT_ys)
+title('FT Y sphère')
+VP_ys = eig(AyS)
+print('Lieu_Ys_sphere','-dpng','-r300')
 
 %Entrée :phi 
-%sortie : omegaX sphère
-[a_phi_x, b_phi_x] = ss2tf(AxS,BxS,CxS,DxS,1);
+%sortie : Y sphère
 
-FT_phi_omega = tf(a_phi_x(2,:),b_phi_x)
+FT_omega_ys = tf(a_ys(2,:),b_ys)
 figure 
-rlocus(FT_phi_omega)
-title('FT \omega_X / \phi')
-VP_phi = eig(AxS)
+rlocus(FT_omega_ys)
+title('FT \omega_Y')
 print('Lieu_omegaX_sphere','-dpng','-r300')
 
 
