@@ -1,5 +1,8 @@
 # FloatingTrain
 
+Fourth semester project. The goal was to maintain a sphere in the middle of a floating surface using electro-magnets.
+Those are all the calculations required to apply the right force on each magnet.
+
 ## Voici la nomenclature à utiliser dans le code MATLAB/Simulink:
 1. masseS : masse de la sphère
 2. masseP : masse de la plaque
